@@ -1,11 +1,11 @@
 # general configuration
-url: http://excentris.net
+url: http://www.carlosbarboza.me
 baseurl: ''
 
 # compass configuration
 compass:
   # an avatar or logo (optional)
-  logo: "/images/compass.png"
+  logo: "/images/fossilizedbits.png"
   # author will appear under the avatar (optional)
   author: "Carlos E. Barboza"
   # tagline will appear under the title (optional)

@@ -1,0 +1,24 @@
+---
+import { type CollectionEntry, render } from "astro:content";
+import Datetime from "./Datetime.astro";
+
+type Props = {
+  entry: CollectionEntry<"micro">;
+};
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+
+<li id={entry.id} class="micro-entry border-border border-b border-dashed py-6">
+  <a
+    href={`#${entry.id}`}
+    class="hover:text-accent inline-block"
+    title="Link to this micro post"
+  >
+    <Datetime pubDatetime={entry.data.date} />
+  </a>
+  <div class="app-prose micro-body mt-2 max-w-app">
+    <Content />
+  </div>
+</li>

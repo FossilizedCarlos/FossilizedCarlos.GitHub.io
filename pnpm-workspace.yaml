@@ -1,0 +1,6 @@
+allowBuilds:
+  esbuild: true
+  sharp: true
+
+# Flat node_modules, so packages never resolve from ~/Developer/Astro/node_modules.
+nodeLinker: hoisted

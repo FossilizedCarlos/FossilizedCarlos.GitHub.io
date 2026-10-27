@@ -1,0 +1,78 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Breadcrumb from "@/components/Breadcrumb.astro";
+import Main from "@/components/Main.astro";
+import Footer from "@/components/Footer.astro";
+import Datetime from "@/components/Datetime.astro";
+import PlacesMap from "@/components/PlacesMap.astro";
+import { getSortedEntries } from "@/utils/getSortedEntries";
+import { getPlaceSummary, getPlaceUrl, toMapPlace } from "@/utils/places";
+import { useTranslations } from "@/i18n";
+import config from "@/config";
+
+const locale = Astro.currentLocale ?? config.site.lang;
+const t = useTranslations(locale);
+
+const places = await getSortedEntries("places");
+const recent = places.slice(0, 5);
+
+const byCountry = Object.entries(
+  Object.groupBy(places, ({ data }) => data.country ?? "Elsewhere")
+).sort(([a], [b]) => a.localeCompare(b));
+---
+
+<Layout title={`${t.pages.placesTitle} | ${config.site.title}`}>
+  <Header />
+
+  <Breadcrumb />
+
+  <Main pageTitle={t.pages.placesTitle} pageDesc={t.pages.placesDesc}>
+    <PlacesMap places={places.map(place => toMapPlace(place, locale))} />
+
+    <section class="pt-10">
+      <h2 class="text-2xl font-semibold tracking-wide">Recently Added</h2>
+      <ul>
+        {
+          recent.map(place => (
+            <li class="my-6">
+              <a
+                href={getPlaceUrl(place.id, locale)}
+                class="text-accent inline-block text-lg font-medium decoration-dashed underline-offset-4 hover:underline"
+              >
+                <h3>{place.data.title}</h3>
+              </a>
+              <Datetime pubDatetime={place.data.date} />
+              <p>{getPlaceSummary(place)}</p>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section class="border-border border-t pt-10">
+      <h2 class="text-2xl font-semibold tracking-wide">All Places</h2>
+      {
+        byCountry.map(([country, entries]) => (
+          <div class="mt-6">
+            <h3 class="text-muted-foreground text-lg font-medium">{country}</h3>
+            <ul class="mt-2 ms-5 list-disc marker:text-accent">
+              {entries?.map(place => (
+                <li class="my-1">
+                  <a
+                    href={getPlaceUrl(place.id, locale)}
+                    class="hover:text-accent decoration-dashed underline-offset-4 hover:underline"
+                  >
+                    {place.data.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </section>
+  </Main>
+
+  <Footer />
+</Layout>

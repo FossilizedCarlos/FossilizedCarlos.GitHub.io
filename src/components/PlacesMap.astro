@@ -1,0 +1,345 @@
+---
+export type MapPlace = {
+  title: string;
+  lat: number;
+  lon: number;
+  url?: string;
+  country?: string;
+  location?: string;
+  summary?: string;
+};
+
+type Props = {
+  places: MapPlace[];
+  /** "overview" clusters every place and shades visited countries. */
+  mode?: "overview" | "single";
+  class?: string;
+};
+
+const { places, mode = "overview", class: className } = Astro.props;
+---
+
+<div
+  class:list={["places-map", `places-map-${mode}`, className]}
+  data-places-map={mode}
+  data-places={JSON.stringify(places)}
+  role="region"
+  aria-label={mode === "overview" ? "Map of places" : `Map of ${places[0]?.title ?? "place"}`}
+>
+</div>
+
+<style is:global>
+  .places-map {
+    background: #a9cfdd;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+    z-index: 0;
+  }
+  .places-map-overview {
+    height: clamp(360px, 52vh, 500px);
+  }
+  .places-map-single {
+    aspect-ratio: 16 / 10;
+  }
+  [data-theme="dark"] .places-map {
+    background: #050914;
+  }
+  [data-theme="dark"] .places-map .leaflet-tile-pane {
+    filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9);
+  }
+  .places-map .leaflet-control-attribution {
+    background: color-mix(in srgb, var(--background) 75%, transparent);
+    color: var(--muted-foreground);
+    font-size: 10px;
+  }
+  .places-map .leaflet-control-attribution a {
+    color: inherit;
+  }
+  .places-map .leaflet-bar a {
+    background: var(--background);
+    border-color: var(--border);
+    color: var(--foreground);
+  }
+  .places-map .leaflet-bar a:hover,
+  .places-map .leaflet-bar a:focus {
+    background: var(--muted);
+    color: var(--accent);
+  }
+  .places-map .leaflet-popup-content-wrapper,
+  .places-map .leaflet-popup-tip {
+    background: var(--background);
+    color: var(--foreground);
+  }
+  .places-map .leaflet-popup-content a {
+    color: var(--accent);
+  }
+  .places-map .leaflet-popup-content ul {
+    margin: 0.35rem 0 0;
+    padding-left: 1rem;
+  }
+  .places-cluster {
+    align-items: center;
+    background: var(--accent);
+    border-radius: 999px;
+    box-shadow: 0 5px 16px rgb(0 0 0 / 0.3);
+    color: var(--accent-foreground);
+    display: flex;
+    font-size: 0.82rem;
+    font-weight: 700;
+    justify-content: center;
+  }
+  .places-point {
+    background: var(--accent);
+    border: 2px solid rgb(255 255 255 / 0.9);
+    border-radius: 999px;
+    box-shadow: 0 3px 12px rgb(0 0 0 / 0.35);
+  }
+  .places-reset svg {
+    fill: none;
+    height: 16px;
+    margin: 7px;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2.4;
+    width: 16px;
+  }
+</style>
+
+<script>
+  /* Leaflet ships as a global script, so load it from the CDN on demand. */
+  type Place = {
+    title: string;
+    lat: number;
+    lon: number;
+    url?: string;
+    country?: string;
+    location?: string;
+    summary?: string;
+  };
+
+  type Leaflet = any;
+
+  const LEAFLET = "https://unpkg.com/leaflet@1.9.4/dist";
+  const CLUSTER = "https://unpkg.com/leaflet.markercluster@1.5.3/dist";
+  const COUNTRIES =
+    "https://cdn.jsdelivr.net/gh/johan/world.geo.json@master/countries.geo.json";
+  const ATTRIBUTION =
+    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
+  const loaded = new Map<string, Promise<void>>();
+
+  function load(url: string): Promise<void> {
+    if (!loaded.has(url)) {
+      loaded.set(
+        url,
+        new Promise((resolve, reject) => {
+          const el = url.endsWith(".css")
+            ? Object.assign(document.createElement("link"), {
+                rel: "stylesheet",
+                href: url,
+              })
+            : Object.assign(document.createElement("script"), { src: url });
+          el.addEventListener("load", () => resolve());
+          el.addEventListener("error", reject);
+          document.head.appendChild(el);
+        })
+      );
+    }
+    return loaded.get(url)!;
+  }
+
+  async function loadLeaflet(withClusters: boolean): Promise<Leaflet> {
+    await Promise.all([load(`${LEAFLET}/leaflet.css`), load(`${LEAFLET}/leaflet.js`)]);
+    if (withClusters) {
+      await Promise.all([
+        load(`${CLUSTER}/MarkerCluster.css`),
+        load(`${CLUSTER}/MarkerCluster.Default.css`),
+        load(`${CLUSTER}/leaflet.markercluster.js`),
+      ]);
+    }
+    return (window as unknown as { L: Leaflet }).L;
+  }
+
+  const escape = (value = "") =>
+    value.replace(
+      /[&<>"']/g,
+      c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!
+    );
+
+  /**
+   * OpenStreetMap needs no API key. It has no dark style, so dark mode
+   * inverts the tile pane in CSS; only the country shading needs a restyle.
+   */
+  function themedTiles(L: Leaflet, map: Leaflet, onChange?: () => void) {
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: ATTRIBUTION,
+      maxZoom: 19,
+    }).addTo(map);
+
+    if (!onChange) return;
+    const observer = new MutationObserver(onChange);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+    document.addEventListener("astro:before-swap", () => observer.disconnect(), {
+      once: true,
+    });
+  }
+
+  function pointIcon(L: Leaflet) {
+    return L.divIcon({
+      className: "places-point",
+      iconSize: [16, 16],
+      iconAnchor: [8, 8],
+      popupAnchor: [0, -8],
+    });
+  }
+
+  function initSingle(L: Leaflet, el: HTMLElement, place: Place) {
+    const coords = [place.lat, place.lon];
+    const map = L.map(el, { scrollWheelZoom: false }).setView(coords, 13);
+    map.attributionControl.setPrefix(false);
+    themedTiles(L, map);
+    L.marker(coords, { icon: pointIcon(L) })
+      .bindPopup(
+        `<strong>${escape(place.title)}</strong>${place.location ? `<br>${escape(place.location)}` : ""}`
+      )
+      .addTo(map);
+  }
+
+  function initOverview(L: Leaflet, el: HTMLElement, places: Place[]) {
+    const map = L.map(el, { worldCopyJump: true, minZoom: 2 });
+    map.attributionControl.setPrefix(false);
+
+    type Country = { name: string; total: number; places: Place[] };
+    const countries = places.reduce<Record<string, Country>>((acc, place) => {
+      if (!place.country) return acc;
+      const key = place.country.toLowerCase();
+      acc[key] ??= { name: place.country, total: 0, places: [] };
+      acc[key].total += 1;
+      acc[key].places.push(place);
+      return acc;
+    }, {});
+
+    const accent = () =>
+      getComputedStyle(document.documentElement).getPropertyValue("--accent").trim();
+
+    const countryStyle = (feature: { properties: { name?: string } }) => {
+      const country = countries[(feature.properties.name ?? "").toLowerCase()];
+      if (!country) {
+        return { opacity: 0, fillOpacity: 0, weight: 0 };
+      }
+      return {
+        color: accent(),
+        fillColor: accent(),
+        fillOpacity: Math.min(0.08 + country.total * 0.03, 0.25),
+        opacity: 0.55,
+        weight: 1,
+      };
+    };
+
+    let countryLayer: Leaflet = null;
+    themedTiles(L, map, () => countryLayer?.setStyle(countryStyle));
+
+    fetch(COUNTRIES)
+      .then(response => response.json())
+      .then(geo => {
+        countryLayer = L.geoJSON(geo, {
+          style: countryStyle,
+          onEachFeature: (feature: { properties: { name?: string } }, layer: Leaflet) => {
+            const country = countries[(feature.properties.name ?? "").toLowerCase()];
+            if (!country) return;
+            const label = country.total === 1 ? "1 place" : `${country.total} places`;
+            const links = country.places
+              .map(p => `<li><a href="${escape(p.url)}">${escape(p.title)}</a></li>`)
+              .join("");
+            layer.bindPopup(`<strong>${escape(country.name)}</strong><br>${label}<ul>${links}</ul>`);
+          },
+        }).addTo(map);
+        countryLayer.bringToBack();
+      })
+      // eslint-disable-next-line no-console
+      .catch(error => console.error("Country boundaries did not load", error));
+
+    const group =
+      typeof L.markerClusterGroup === "function"
+        ? L.markerClusterGroup({
+            maxClusterRadius: 56,
+            showCoverageOnHover: false,
+            iconCreateFunction: (cluster: Leaflet) =>
+              L.divIcon({
+                html: `<span>${cluster.getChildCount()}</span>`,
+                className: "places-cluster",
+                iconSize: L.point(40, 40),
+              }),
+          })
+        : L.featureGroup();
+
+    for (const p of places) {
+      L.marker([p.lat, p.lon], { icon: pointIcon(L) })
+        .bindPopup(
+          `<strong><a href="${escape(p.url)}">${escape(p.title)}</a></strong>${p.summary ? `<br>${escape(p.summary)}` : ""}`
+        )
+        .addTo(group);
+    }
+    group.addTo(map);
+
+    const bounds = places.length ? group.getBounds().pad(0.2) : null;
+    const reset = () => (bounds ? map.fitBounds(bounds) : map.setView([20, 0], 2));
+    reset();
+
+    const ResetControl = L.Control.extend({
+      options: { position: "topleft" },
+      onAdd: () => {
+        const container = L.DomUtil.create("div", "leaflet-bar leaflet-control");
+        const link = L.DomUtil.create("a", "places-reset", container);
+        link.href = "#";
+        link.title = "Reset map view";
+        link.setAttribute("aria-label", "Reset map view");
+        link.innerHTML =
+          '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3L4.5 8.9"/><path d="M4.5 4.5v4.4h4.4"/></svg>';
+        L.DomEvent.disableClickPropagation(container);
+        L.DomEvent.on(link, "click", (event: Event) => {
+          L.DomEvent.preventDefault(event);
+          reset();
+        });
+        return container;
+      },
+    });
+    map.addControl(new ResetControl());
+  }
+
+  async function initMaps() {
+    const elements = document.querySelectorAll<HTMLElement>("[data-places-map]");
+    if (elements.length === 0) return;
+
+    const needsClusters = Array.from(elements).some(
+      el => el.dataset.placesMap === "overview"
+    );
+    let L: Leaflet;
+    try {
+      L = await loadLeaflet(needsClusters);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error("Leaflet did not load", error);
+      return;
+    }
+
+    for (const el of elements) {
+      if (el.dataset.ready) continue;
+      el.dataset.ready = "true";
+      const places = JSON.parse(el.dataset.places ?? "[]") as Place[];
+      if (el.dataset.placesMap === "single") {
+        if (places[0]) initSingle(L, el, places[0]);
+      } else {
+        initOverview(L, el, places);
+      }
+    }
+  }
+
+  document.addEventListener("astro:page-load", initMaps);
+</script>

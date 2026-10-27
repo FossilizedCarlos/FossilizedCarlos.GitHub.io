@@ -1,0 +1,144 @@
+---
+import { type CollectionEntry, render } from "astro:content";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import Datetime from "@/components/Datetime.astro";
+import PlacesMap from "@/components/PlacesMap.astro";
+import BackButton from "@/components/post/BackButton.astro";
+import IconApple from "@/assets/icons/IconApple.svg";
+import IconOpenStreetMap from "@/assets/icons/IconOpenStreetMap.svg";
+import { getSortedEntries } from "@/utils/getSortedEntries";
+import { getPlaceImageSrc, getPlaceSummary, toMapPlace } from "@/utils/places";
+import config from "@/config";
+
+export async function getStaticPaths() {
+  const places = await getSortedEntries("places");
+  return places.map(place => ({ params: { slug: place.id }, props: { place } }));
+}
+
+type Props = { place: CollectionEntry<"places"> };
+
+const { place } = Astro.props;
+const { data } = place;
+const { Content } = await render(place);
+const locale = Astro.currentLocale ?? config.site.lang;
+
+const mapLinks = [
+  { href: data.appleMaps, label: "Open in Apple Maps", Icon: IconApple },
+  { href: data.openStreetMap, label: "Open in OpenStreetMap", Icon: IconOpenStreetMap },
+].filter(link => link.href);
+---
+
+<Layout
+  title={`${data.title} | ${config.site.title}`}
+  description={getPlaceSummary(place)}
+>
+  <Header />
+
+  <BackButton />
+
+  <main
+    id="main-content"
+    class:list={["app-layout pb-8", { "mt-8": !config.features.showBackButton }]}
+    data-pagefind-body
+  >
+    <h1 class="text-accent inline-block text-2xl font-bold sm:text-3xl">
+      {data.title}
+    </h1>
+    <div class="my-2">
+      <Datetime pubDatetime={data.date} size="lg" />
+    </div>
+
+    <section class="mt-8" aria-label={`${data.title} map and links`}>
+      <PlacesMap places={[toMapPlace(place, locale)]} mode="single" />
+      <div class="flex items-center justify-between gap-4 pt-3">
+        <div class="min-w-0">
+          <p class="font-semibold">{data.placeName ?? data.title}</p>
+          <p class="text-muted-foreground text-sm">
+            {data.placeAddress ?? data.placeLocation ?? data.country}
+          </p>
+        </div>
+        <div class="flex gap-3">
+          {
+            mapLinks.map(({ href, label, Icon }) => (
+              <a
+                href={href}
+                title={label}
+                aria-label={label}
+                target="_blank"
+                rel="noopener"
+                class="border-border hover:border-accent hover:bg-accent hover:text-accent-foreground inline-flex size-9 items-center justify-center rounded-full border"
+              >
+                <Icon class="size-5 fill-current" aria-hidden="true" />
+              </a>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <article class="app-prose max-w-app mt-8">
+      <Content />
+    </article>
+
+    {
+      data.placeImages.length > 0 && (
+        <section class="mt-10" aria-label="Photos">
+          <h2 class="mb-4 text-xl font-semibold">Photos</h2>
+          <div class="place-gallery">
+            {data.placeImages.map(image => (
+              <figure>
+                <img
+                  src={getPlaceImageSrc(image.src)}
+                  alt={image.alt ?? `${data.title} photo`}
+                  loading="lazy"
+                />
+                {image.caption && <figcaption>{image.caption}</figcaption>}
+              </figure>
+            ))}
+          </div>
+        </section>
+      )
+    }
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  .place-gallery {
+    display: grid;
+    gap: 0.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+  }
+  .place-gallery figure {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin: 0;
+    overflow: hidden;
+    position: relative;
+    aspect-ratio: 4 / 3;
+  }
+  .place-gallery figure:first-child {
+    grid-column: 1 / -1;
+    aspect-ratio: 16 / 9;
+  }
+  .place-gallery img {
+    display: block;
+    height: 100%;
+    object-fit: cover;
+    width: 100%;
+  }
+  .place-gallery figcaption {
+    background: linear-gradient(to top, rgb(0 0 0 / 0.55), transparent);
+    bottom: 0;
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    left: 0;
+    padding: 1.5rem 0.75rem 0.5rem;
+    position: absolute;
+    right: 0;
+  }
+</style>

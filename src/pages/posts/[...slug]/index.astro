@@ -1,0 +1,12 @@
+---
+import PostDetail, {
+  type Props as PostDetailProps,
+} from "@/components/PostDetail.astro";
+import { getArticlePaths } from "@/utils/getArticlePaths";
+
+export const getStaticPaths = () => getArticlePaths("posts");
+
+type Props = PostDetailProps;
+---
+
+<PostDetail {...Astro.props} />

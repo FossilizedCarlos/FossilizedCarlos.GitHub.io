@@ -1,0 +1,55 @@
+# Astro Blowfish
+
+Carlos E. Barboza's site, ported from the Hugo [Blowfish](https://www.carlosbarboza.me/Blowfish/) version to [Astro](https://astro.build) with the [AstroPaper](https://github.com/satnaing/astro-paper) theme.
+
+## Sections
+
+| Section | Content folder         | URL       |
+| ------- | ---------------------- | --------- |
+| Blog    | `src/content/posts/`   | `/posts`  |
+| Notes   | `src/content/notes/`   | `/notes`  |
+| Micro   | `src/content/micro/`   | `/micro`  |
+| Places  | `src/content/places/`  | `/places` |
+| About   | `src/content/pages/about.md` | `/about` |
+
+Content files use the Hugo front matter (`date`, `description`, `tags`) and can be a single file or a page bundle (`my-post/index.md`). The Hugo shortcodes `micro-social`, `prompt`, `alert` and `center-image` are rendered by `src/utils/remarkHugoShortcodes.ts`, so files can be copied in unchanged.
+
+Site settings (title, socials, posts per page) are in `astro-paper.config.ts`.
+
+## Commands
+
+Run these from this folder. They use the `astro` container machine, so nothing is installed on macOS.
+
+Start the dev server at http://192.168.64.3:4321:
+
+```sh
+container machine run -n astro -- npm run dev -- --host 0.0.0.0 --force
+```
+
+Build the site to `dist/` (type check, build, search index):
+
+```sh
+container machine run -n astro -- npm run build
+```
+
+Preview the build:
+
+```sh
+container machine run -n astro -- npm run preview -- --host 0.0.0.0
+```
+
+Install dependencies:
+
+```sh
+container machine run -n astro -- corepack pnpm install
+```
+
+## Notes
+
+- `pnpm-workspace.yaml` sets `nodeLinker: hoisted`. Without it, packages can resolve from `~/Developer/Astro/node_modules` and the build fails.
+- `astro.config.ts` polls for file changes, because the container machine's home mount sends no file events.
+- The Places maps load Leaflet from unpkg and use OpenStreetMap tiles.
+
+## License
+
+Theme: AstroPaper by Sat Naing, MIT (see `LICENSE`).

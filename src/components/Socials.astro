@@ -1,0 +1,47 @@
+---
+import config from "@/config";
+import LinkButton from "./LinkButton.astro";
+
+const { site, socials } = config;
+
+const icons = import.meta.glob<{
+  default: (_props: Record<string, unknown>) => unknown;
+}>("/src/assets/icons/socials/*.svg");
+
+// Brand icons from Font Awesome are filled shapes; the bundled Tabler
+// icons are outlines.
+const filledIcons = new Set(["mastodon", "bluesky", "microblog"]);
+
+const items = await Promise.all(
+  socials.map(async ({ name, url, linkTitle }) => {
+    const mod = await icons[`/src/assets/icons/socials/${name}.svg`]?.();
+    const Icon = mod?.default;
+    const title =
+      linkTitle ??
+      (url.startsWith("mailto:") || name === "mail"
+        ? `Send an email to ${site.title}`
+        : `${site.title} on ${name.charAt(0).toUpperCase() + name.slice(1)}`);
+    return { url, title, Icon, filled: filledIcons.has(name) };
+  })
+);
+---
+
+<div class="flex flex-wrap items-center gap-1">
+  {
+    items.map(({ url, title, Icon, filled }) =>
+      Icon ? (
+        <LinkButton href={url} class="p-2 hover:rotate-6 sm:p-1" title={title}>
+          <Icon
+            class:list={[
+              "inline-block size-6 opacity-90",
+              filled
+                ? "scale-90 fill-current sm:scale-80"
+                : "scale-125 fill-transparent stroke-current stroke-2 group-hover:fill-transparent sm:scale-110",
+            ]}
+          />
+          <span class="sr-only">{title}</span>
+        </LinkButton>
+      ) : null
+    )
+  }
+</div>

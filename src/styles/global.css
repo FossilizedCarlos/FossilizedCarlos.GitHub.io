@@ -1,0 +1,97 @@
+@import "tailwindcss";
+@import "./theme.css";
+@import "./typography.css";
+@import "rehype-callouts/theme/obsidian";
+
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+@layer base {
+  * {
+    @apply border-border outline-accent/75;
+    scrollbar-width: auto;
+    scrollbar-color: var(--color-muted) transparent;
+  }
+  a,
+  button,
+  #main-content {
+    @apply outline-accent outline-offset-1 focus-visible:no-underline focus-visible:outline-2 focus-visible:outline-dashed;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+@utility max-w-app {
+  @apply max-w-3xl;
+}
+
+@utility app-layout {
+  @apply max-w-app mx-auto w-full px-4;
+}
+
+@utility active-nav {
+  @apply underline decoration-wavy decoration-2 underline-offset-8;
+}
+
+:target {
+  scroll-margin-block: 1rem;
+}
+
+/* ===== Hugo shortcodes carried over from the Blowfish site ===== */
+
+/* {{< micro-social >}} links */
+.micro-social {
+  display: inline-flex;
+  margin-inline-start: 0.35rem;
+  vertical-align: -0.125em;
+
+  & svg {
+    fill: currentColor;
+    height: 1em;
+    width: 1em;
+  }
+}
+
+.micro-body > :first-child {
+  margin-top: 0;
+}
+
+.micro-body > :last-child {
+  margin-bottom: 0;
+}
+
+/* {{< prompt >}} and {{< alert >}} boxes */
+.prompt-box,
+.alert-box {
+  @apply border-border my-6 rounded-lg border px-4 py-1;
+
+  & > :first-child {
+    margin-top: 0.75rem;
+  }
+}
+
+.prompt-box {
+  @apply bg-muted/30;
+}
+
+.prompt-label {
+  @apply text-accent font-semibold;
+
+  &::before {
+    content: "> ";
+  }
+}
+
+.alert-box {
+  @apply border-s-accent border-s-4;
+}
+
+/* {{< center-image >}} */
+.center-image {
+  @apply my-6 flex justify-center;
+
+  & img {
+    max-width: 100%;
+  }
+}

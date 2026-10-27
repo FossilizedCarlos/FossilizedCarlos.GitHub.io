@@ -22,12 +22,16 @@
   }
 }
 
+/*
+ * Widths match the Hugo Blowfish site: a 1280px (max-w-7xl) container with
+ * growing side padding, which leaves 1024px (max-w-5xl) for content.
+ */
 @utility max-w-app {
-  @apply max-w-3xl;
+  @apply max-w-5xl;
 }
 
 @utility app-layout {
-  @apply max-w-app mx-auto w-full px-4;
+  @apply mx-auto w-full max-w-7xl px-6 sm:px-14 md:px-24 lg:px-32;
 }
 
 @utility active-nav {
@@ -51,6 +55,12 @@
     height: 1em;
     width: 1em;
   }
+}
+
+/* Articles stay at the prose size (16px); micro posts use the page size, as in Blowfish. */
+.micro-body {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
 }
 
 .micro-body > :first-child {

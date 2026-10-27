@@ -2,6 +2,7 @@ import { defineCollection, type SchemaContext } from "astro:content";
 import { z } from "astro/zod";
 import { glob } from "astro/loaders";
 import config from "@/config";
+import { slugifyStr } from "@/utils/slugify";
 
 export const BLOG_PATH = "src/content/posts";
 export const NOTES_PATH = "src/content/notes";
@@ -9,9 +10,14 @@ export const NOTES_PATH = "src/content/notes";
 /**
  * Page bundles (`my-post/index.md`) get the folder name as their id,
  * so Hugo-style bundles and flat files produce the same URLs.
+ * File names with spaces become URL slugs (`My Note.md` → `my-note`).
  */
 const bundleId = ({ entry }: { entry: string }) =>
-  entry.replace(/(\/index)?\.mdx?$/, "");
+  entry
+    .replace(/(\/index)?\.mdx?$/, "")
+    .split("/")
+    .map(slugifyStr)
+    .join("/");
 
 /**
  * Blog posts and notes share one schema. Hugo front matter uses `date`,

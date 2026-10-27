@@ -148,10 +148,22 @@ export default function remarkHugoShortcodes(this: unknown) {
       return { type: "html", value: centerImage(parseArgs(whole[1]).named) };
     }
 
+    // Shortcodes written inside `inline code` are examples, not shortcodes.
+    const start = node.position?.start.offset ?? 0;
+    const codeRanges = (node.children ?? [])
+      .filter(child => child.type === "inlineCode")
+      .map(child => [
+        (child.position?.start.offset ?? 0) - start,
+        (child.position?.end.offset ?? 0) - start,
+      ]);
+    const inCode = (index: number) =>
+      codeRanges.some(([from, to]) => index >= from && index < to);
+
     const children: Node[] = [];
     let last = 0;
     for (const match of raw.matchAll(SHORTCODE)) {
       const [text, name, rawArgs] = match;
+      if (inCode(match.index ?? 0)) continue;
       const { positional, named } = parseArgs(rawArgs);
       let html: string | null = null;
       if (name === "micro-social") html = microSocial(positional);

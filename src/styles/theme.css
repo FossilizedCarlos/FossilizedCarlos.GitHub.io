@@ -15,7 +15,8 @@
 [data-theme="light"] {
   --background: #fdfdfd;
   --foreground: #282728;
-  --accent: #006cac;
+  /* Green from the Fossilized Bits logo hover (--curve, light theme) */
+  --accent: #1f6e5a;
   --accent-foreground: #ffffff;
   --muted: #e6e6e6;
   --muted-foreground: #6b7280;
@@ -26,9 +27,10 @@
 [data-theme="dark"] {
   --background: #212737;
   --foreground: #eaedf3;
-  --accent: #ff6b01;
-  --accent-foreground: #ffffff;
+  /* Aqua green from the Fossilized Bits logo hover (--curve, dark theme) */
+  --accent: #5cc0a0;
+  --accent-foreground: #151c1f;
   --muted: #343f60;
   --muted-foreground: #afb9ca;
-  --border: #ab4b08;
+  --border: #1f6e5a;
 }

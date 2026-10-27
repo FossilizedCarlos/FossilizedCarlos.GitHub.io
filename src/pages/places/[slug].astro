@@ -1,5 +1,6 @@
 ---
 import { type CollectionEntry, render } from "astro:content";
+import { getImage } from "astro:assets";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
@@ -9,7 +10,14 @@ import BackButton from "@/components/post/BackButton.astro";
 import IconApple from "@/assets/icons/IconApple.svg";
 import IconOpenStreetMap from "@/assets/icons/IconOpenStreetMap.svg";
 import { getSortedEntries } from "@/utils/getSortedEntries";
-import { getPlaceImageSrc, getPlaceSummary, toMapPlace } from "@/utils/places";
+import IconX from "@/assets/icons/IconX.svg";
+import {
+  getGalleryRows,
+  getPlaceImageSrc,
+  getPlacePhoto,
+  getPlaceSummary,
+  toMapPlace,
+} from "@/utils/places";
 import config from "@/config";
 
 export async function getStaticPaths() {
@@ -28,6 +36,57 @@ const mapLinks = [
   { href: data.appleMaps, label: "Open in Apple Maps", Icon: IconApple },
   { href: data.openStreetMap, label: "Open in OpenStreetMap", Icon: IconOpenStreetMap },
 ].filter(link => link.href);
+
+// Each photo spans part of a 6-column grid: 6 alone, 3 in a row of 2, 2 in a row of 3.
+const photoCount = data.placeImages.length;
+const spans = getGalleryRows(photoCount).flatMap(perRow =>
+  Array.from({ length: perRow }, () => 6 / perRow)
+);
+
+// Content is at most 1024px wide; phones show 2 photos per row.
+const CONTENT_WIDTH = 1024;
+const GRID_WIDTHS = [400, 700, 1000, 1400];
+const POPOVER_WIDTH = 1600;
+
+const photos = await Promise.all(
+  data.placeImages.map(async (image, index) => {
+    const span = spans[index];
+    // Phones use 2 columns; a lone photo or the odd last one takes the full row.
+    const fullOnPhone = photoCount % 2 === 1 && index === photoCount - 1;
+    const sizes = [
+      `(min-width: 1280px) ${Math.round((CONTENT_WIDTH * span) / 6)}px`,
+      `(min-width: 640px) ${Math.round((100 * span) / 6)}vw`,
+      fullOnPhone ? "100vw" : "50vw",
+    ].join(", ");
+
+    const photo = getPlacePhoto(image.src);
+    let grid = { src: getPlaceImageSrc(image.src), srcset: "", sizes: "" };
+    let large = grid.src;
+    if (photo) {
+      const [gridImage, largeImage] = await Promise.all([
+        getImage({
+          src: photo,
+          width: Math.min(1000, photo.width),
+          widths: GRID_WIDTHS.filter(w => w < photo.width),
+          format: "webp",
+          quality: 80,
+        }),
+        getImage({ src: photo, width: Math.min(POPOVER_WIDTH, photo.width), format: "webp", quality: 82 }),
+      ]);
+      grid = { src: gridImage.src, srcset: gridImage.srcSet.attribute, sizes };
+      large = largeImage.src;
+    }
+
+    return {
+      ...grid,
+      large,
+      alt: image.alt ?? `${data.title} photo`,
+      caption: image.caption,
+      span,
+      fullOnPhone,
+    };
+  })
+);
 ---
 
 <Layout
@@ -83,18 +142,30 @@ const mapLinks = [
     </article>
 
     {
-      data.placeImages.length > 0 && (
+      photos.length > 0 && (
         <section class="mt-10" aria-label="Photos">
           <h2 class="mb-4 text-xl font-semibold">Photos</h2>
-          <div class="place-gallery">
-            {data.placeImages.map(image => (
-              <figure>
-                <img
-                  src={getPlaceImageSrc(image.src)}
-                  alt={image.alt ?? `${data.title} photo`}
-                  loading="lazy"
-                />
-                {image.caption && <figcaption>{image.caption}</figcaption>}
+          <div class:list={["place-gallery", { single: photos.length === 1 }]}>
+            {photos.map(({ src, srcset, sizes, large, alt, caption, span, fullOnPhone }) => (
+              <figure class:list={[`span-${span}`, { "full-on-phone": fullOnPhone }]}>
+                <button
+                  type="button"
+                  class="place-photo"
+                  data-src={large}
+                  data-alt={alt}
+                  data-caption={caption ?? ""}
+                  aria-label={`Show larger: ${alt}`}
+                >
+                  <img
+                    {src}
+                    srcset={srcset || undefined}
+                    sizes={sizes || undefined}
+                    {alt}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </button>
+                {caption && <figcaption>{caption}</figcaption>}
               </figure>
             ))}
           </div>
@@ -104,31 +175,71 @@ const mapLinks = [
   </main>
 
   <Footer />
+
+  <dialog id="photo-dialog" class="photo-dialog" aria-label="Photo">
+    <form method="dialog">
+      <button class="photo-dialog-close" aria-label="Close photo">
+        <IconX aria-hidden="true" />
+      </button>
+    </form>
+    <img id="photo-dialog-img" src="" alt="" />
+    <p id="photo-dialog-caption" class="photo-dialog-caption"></p>
+  </dialog>
 </Layout>
 
 <style>
+  /*
+   * Rows of 3 and 2 on a 6-column grid; the row sizes come from getGalleryRows.
+   * Phones use 2 columns.
+   */
   .place-gallery {
     display: grid;
     gap: 0.5rem;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .place-gallery figure {
+    aspect-ratio: 4 / 3;
     border: 1px solid var(--border);
     border-radius: 6px;
     margin: 0;
     overflow: hidden;
     position: relative;
-    aspect-ratio: 4 / 3;
   }
-  .place-gallery figure:first-child {
-    grid-column: 1 / -1;
+  .place-gallery figure.full-on-phone {
+    grid-column: span 2;
+  }
+  .place-gallery.single figure {
     aspect-ratio: 16 / 9;
+  }
+  @media (min-width: 640px) {
+    .place-gallery {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+    .place-gallery figure.span-2 {
+      grid-column: span 2;
+    }
+    .place-gallery figure.span-3 {
+      grid-column: span 3;
+    }
+    .place-gallery figure.span-6 {
+      grid-column: span 6;
+    }
+  }
+  .place-photo {
+    cursor: zoom-in;
+    display: block;
+    height: 100%;
+    width: 100%;
   }
   .place-gallery img {
     display: block;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.2s;
     width: 100%;
+  }
+  .place-photo:hover img {
+    transform: scale(1.03);
   }
   .place-gallery figcaption {
     background: linear-gradient(to top, rgb(0 0 0 / 0.55), transparent);
@@ -138,7 +249,87 @@ const mapLinks = [
     font-weight: 600;
     left: 0;
     padding: 1.5rem 0.75rem 0.5rem;
+    pointer-events: none;
     position: absolute;
     right: 0;
   }
+
+  /* Popover: the whole photo, a little wider than the content column. */
+  .photo-dialog {
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--foreground);
+    margin: auto;
+    max-height: 92vh;
+    max-width: min(1200px, 94vw);
+    overflow: visible;
+    padding: 0;
+  }
+  .photo-dialog::backdrop {
+    backdrop-filter: blur(4px);
+    background: rgb(0 0 0 / 0.7);
+  }
+  .photo-dialog img {
+    border-radius: 8px 8px 0 0;
+    display: block;
+    height: auto;
+    max-height: 85vh;
+    max-width: 100%;
+    object-fit: contain;
+  }
+  .photo-dialog-caption {
+    font-size: 0.95rem;
+    padding: 0.5rem 0.75rem;
+  }
+  .photo-dialog-caption:empty {
+    display: none;
+  }
+  .photo-dialog-close {
+    align-items: center;
+    background: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    display: flex;
+    height: 2.25rem;
+    justify-content: center;
+    position: absolute;
+    right: -0.75rem;
+    top: -0.75rem;
+    width: 2.25rem;
+    z-index: 1;
+  }
+  .photo-dialog-close:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .photo-dialog-close svg {
+    height: 1.25rem;
+    width: 1.25rem;
+  }
 </style>
+
+<script>
+  function initPhotoDialog() {
+    const dialog = document.querySelector<HTMLDialogElement>("#photo-dialog");
+    const image = document.querySelector<HTMLImageElement>("#photo-dialog-img");
+    const caption = document.querySelector("#photo-dialog-caption");
+    if (!dialog || !image || !caption) return;
+
+    for (const button of document.querySelectorAll<HTMLButtonElement>(".place-photo")) {
+      button.addEventListener("click", () => {
+        image.src = button.dataset.src ?? "";
+        image.alt = button.dataset.alt ?? "";
+        caption.textContent = button.dataset.caption ?? "";
+        dialog.showModal();
+      });
+    }
+
+    // A click on the backdrop lands on the dialog itself, not its content.
+    dialog.addEventListener("click", event => {
+      if (event.target === dialog) dialog.close();
+    });
+  }
+
+  document.addEventListener("astro:page-load", initPhotoDialog);
+</script>

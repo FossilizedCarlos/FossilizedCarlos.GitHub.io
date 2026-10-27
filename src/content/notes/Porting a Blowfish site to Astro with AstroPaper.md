@@ -133,7 +133,8 @@ Copy the Hugo files into the Astro folders. Do not change the files.
 | `content/micro/*.md` | `src/content/micro/` |
 | `content/places/*.md` | `src/content/places/` |
 | `content/about.md` | `src/content/pages/about.md` |
-| `static/assets/img/` | `public/assets/img/` |
+| `static/assets/img/places/` | `src/assets/places/` |
+| `static/assets/img/` (other images) | `public/assets/img/` |
 | `assets/img/Carlos.png` | `src/assets/images/Carlos.png` |
 | `assets/icons/mastodon.svg`, `bluesky.svg`, `microblog.svg` | `src/assets/icons/socials/` |
 | `assets/icons/apple.svg`, `openstreetmap.svg` | `src/assets/icons/IconApple.svg`, `IconOpenStreetMap.svg` |
@@ -459,7 +460,32 @@ OpenStreetMap has no dark tiles. In dark mode, a CSS filter inverts the tiles:
 }
 ```
 
-The image paths in the Hugo places start with `/Blowfish/`, the base path of the old site. Remove this part when the page is built:
+Make two pages:
+
+- `src/pages/places/index.astro`: the map, the five newest places, and all places in groups by country.
+- `src/pages/places/[slug].astro`: the map of one place, the links to Apple Maps and OpenStreetMap, the text, and the photos.
+
+### 13. Show the place photos
+
+Astro resizes only the images in `src/`. It copies the images in `public/` without changes. Thus, keep the place photos in `src/assets/places/<place>/`.
+
+The front matter of a place keeps the Hugo path, for example `/Blowfish/assets/img/places/babel/babel-1.jpeg`. A function finds the related file in `src/assets/places/`:
+
+```ts
+const placePhotos = import.meta.glob<{ default: ImageMetadata }>(
+  "/src/assets/places/**/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}",
+  { eager: true }
+);
+
+export function getPlacePhoto(src: string): ImageMetadata | undefined {
+  const relative = src
+    .replace(/^\/Blowfish(?=\/)/, "")
+    .replace(/^\/assets\/img\/places\//, "");
+  return placePhotos[`/src/assets/places/${relative}`]?.default;
+}
+```
+
+If the function finds no file, the page uses the photo from `public/` without changes. The path then loses the `/Blowfish` part of the old site:
 
 ```ts
 export function getPlaceImageSrc(src: string): string {
@@ -468,12 +494,41 @@ export function getPlaceImageSrc(src: string): string {
 }
 ```
 
-Make two pages:
+The page makes WebP copies of each photo with `getImage`:
 
-- `src/pages/places/index.astro`: the map, the five newest places, and all places in groups by country.
-- `src/pages/places/[slug].astro`: the map of one place, the links to Apple Maps and OpenStreetMap, the text, and the photos.
+- For the grid: widths of 400, 700, 1000, and 1400 pixels. The `sizes` attribute tells the browser the width of the photo on the page, so the browser gets only one copy.
+- For the popover: one copy with a width of 1600 pixels.
 
-### 13. Change the home page
+The photos of Babel had a total size of 9 MB. On a screen with a width of 1440 pixels, the page now gets 104 KB for the grid.
+
+The grid uses rows of 3 photos, then rows of 2 photos at the end. No row has only one photo. One photo alone shows at the full width. On phones, the grid has 2 columns.
+
+| Photos | Rows |
+| --- | --- |
+| 2 | 2 |
+| 3 | 3 |
+| 4 | 2 + 2 |
+| 5 | 3 + 2 |
+| 7 | 3 + 2 + 2 |
+
+```ts
+export function getGalleryRows(count: number): number[] {
+  if (count <= 3) return count > 0 ? [count] : [];
+  const rows: number[] = [];
+  let left = count;
+  while (left > 0) {
+    if (left === 4) return [...rows, 2, 2];
+    if (left === 2) return [...rows, 2];
+    rows.push(3);
+    left -= 3;
+  }
+  return rows;
+}
+```
+
+When you click a photo, a `<dialog>` shows the full photo. To close it, click the × button, push Esc, or click out of the photo.
+
+### 14. Change the home page
 
 Edit `src/pages/index.astro`. Show these items:
 
@@ -482,7 +537,7 @@ Edit `src/pages/index.astro`. Show these items:
 3. The two newest notes.
 4. The five newest micro posts.
 
-### 14. Show the brand icons correctly
+### 15. Show the brand icons correctly
 
 The AstroPaper icons are outlines. The Font Awesome icons for Mastodon, Bluesky, and Micro.blog are filled shapes. AstroPaper gives all social icons a transparent fill, so these icons are not visible. Edit `src/components/Socials.astro`:
 
@@ -492,7 +547,7 @@ const filledIcons = new Set(["mastodon", "bluesky", "microblog"]);
 
 Give the filled icons the class `fill-current`. Give the other icons the classes that AstroPaper uses.
 
-### 15. Remove the template files
+### 16. Remove the template files
 
 Remove the files of the AstroPaper project that the site does not use:
 

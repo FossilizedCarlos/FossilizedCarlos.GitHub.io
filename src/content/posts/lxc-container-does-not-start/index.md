@@ -52,7 +52,7 @@ cat /<disk name>/subvol-111-disk-0/etc/debian_version
 nano /usr/share/perl5/PVE/LXC/Setup/Debian.pm
 ```
 
-```linux
+```perl
 die "unsupported debian version '$version'\n"
     if !($version >= 4 && $version <= 11);
 ```
@@ -62,7 +62,7 @@ die "unsupported debian version '$version'\n"
 
 I changed a single number, and the containers started right up... it was madness, but made sense at the same time.
 
-```linux
+```perl
 die "unsupported debian version '$version'\n"
     if !($version >= 4 && $version <= 11.1); #Changed from 11 to 11.1
 ```

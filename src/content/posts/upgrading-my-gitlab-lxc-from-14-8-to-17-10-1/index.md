@@ -59,7 +59,7 @@ apt-get install gitlab-ce=17.10.1-ce.0
 
 I was also very behind on OS upgrades, since this was a Turnkey container from the olden days, and I remember seeing something in the past that led me to neglect it. After a little review of the [versions of Debian supported](https://docs.gitlab.com/administration/package_information/supported_os/), I decided to upgrade the container to Debian 11 before GitLab 16, and Debian 12 right after… but began the upgrade after `gitlab-ce=15.11.13-ce.0` as I saw some errors I was sure were due to older debian version stuff. 
 
-```bsh
+```console
 root@GitLab ~# cat /etc/os-release
 PRETTY_NAME="Debian GNU/Linux 10 (buster)"
 NAME="Debian GNU/Linux"

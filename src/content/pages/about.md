@@ -19,11 +19,11 @@ The Micro section is my attempt at creating a micro blog and syndicating to Mast
 
 ## What tools are used to make this site?
 
-This website is written in Markdown using [Nova](https://nova.app) and [iA Writer](https://ia.net/writer), built with [Jekyll](https://jekyllrb.com), hosted on [Github Pages](https://pages.github.com), and uses the [Lanyon](https://lanyon.getpoole.com) theme with a few modifications to fit my needs.
+This website is written in Markdown using [Nova](https://nova.app) and [iA Writer](https://ia.net/writer), built with [Astro](https://astro.build), hosted on [Github Pages](https://pages.github.com), and uses [AstroPaper](https://astro.build/themes/details/astropaper/) theme with a few modifications to fit my needs.
 
 ## Why did you choose that theme?
 
-Honestly, it is a simple and nice looking theme, which resonates with me. I will tweak it a little here and there, but overall love that type writer look to it!
+Originally, this site was being updated on [Hugo](https://gohugo.io/) using the [Blowfish](https://blowfish.page/) theme, but in one of my many Claude adventures I updated my other site using Astro and immdeiately decided to have both use Astro. AstroPaper is a simple and nice looking theme, which resonates with me. I will tweak it a little here and there, but overall love that type writer look to it!
 
 ## How can I contact you?
 

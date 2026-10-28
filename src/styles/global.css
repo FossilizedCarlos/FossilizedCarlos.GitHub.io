@@ -49,12 +49,32 @@
   display: inline-flex;
   margin-inline-start: 0.35rem;
   vertical-align: -0.125em;
+}
 
-  & svg {
-    fill: currentColor;
-    height: 1em;
-    width: 1em;
-  }
+/*
+ * The icon file is used as a mask and filled with the text color, so it
+ * follows the theme and works for both outline and filled icons.
+ */
+.micro-social-icon {
+  background-color: currentColor;
+  display: inline-block;
+  height: 1.1em;
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+  width: 1.1em;
+}
+
+.micro-social-icon[data-icon="mastodon"] {
+  mask-image: url("../assets/icons/socials/mastodon.svg");
+}
+
+.micro-social-icon[data-icon="bluesky"] {
+  mask-image: url("../assets/icons/socials/bluesky.svg");
+}
+
+.micro-social-icon[data-icon="microblog"] {
+  mask-image: url("../assets/icons/socials/microblog.svg");
 }
 
 /* Articles stay at the prose size (16px); micro posts use the page size, as in Blowfish. */

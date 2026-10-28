@@ -10,9 +10,6 @@
  * Block shortcodes must sit in their own paragraph (blank lines around them),
  * which is how they are written in Hugo.
  */
-import fs from "node:fs";
-import path from "node:path";
-
 type Node = {
   type: string;
   value?: string;
@@ -29,26 +26,6 @@ const SOCIAL_LABELS: Record<string, string> = {
   mastodon: "Mastodon",
   bluesky: "Bluesky",
 };
-
-const ICON_DIR = path.resolve("src/assets/icons/socials");
-const iconCache = new Map<string, string>();
-
-function readIcon(name: string): string {
-  if (!iconCache.has(name)) {
-    let svg = "";
-    try {
-      svg = fs
-        .readFileSync(path.join(ICON_DIR, `${name}.svg`), "utf8")
-        .replace(/<!--[\s\S]*?-->/g, "")
-        .replace(/<svg\b/, '<svg aria-hidden="true" focusable="false"')
-        .trim();
-    } catch {
-      svg = "";
-    }
-    iconCache.set(name, svg);
-  }
-  return iconCache.get(name) ?? "";
-}
 
 const escapeHtml = (value: string) =>
   value
@@ -74,7 +51,10 @@ function microSocial(args: string[]): string {
   return (
     `<a class="micro-social" href="${escapeHtml(url)}" target="_blank" rel="me noopener" ` +
     `title="${escapeHtml(label)}" aria-label="${escapeHtml(label)}">` +
-    `${readIcon(name)}<span class="sr-only">${escapeHtml(label)}</span></a>`
+    // The icon itself is drawn by CSS from src/assets/icons/socials/, so a new
+    // icon file shows up without re-rendering the cached markdown.
+    `<span class="micro-social-icon" data-icon="${escapeHtml(name)}" aria-hidden="true"></span>` +
+    `<span class="sr-only">${escapeHtml(label)}</span></a>`
   );
 }
 

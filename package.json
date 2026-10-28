@@ -2,6 +2,7 @@
   "name": "astro-blowfish",
   "type": "module",
   "version": "0.1.0",
+  "packageManager": "pnpm@12.16.1",
   "engines": {
     "node": ">=22.12.0"
   },

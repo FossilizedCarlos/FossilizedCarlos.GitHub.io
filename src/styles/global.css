@@ -117,6 +117,23 @@
   @apply border-s-accent border-s-4;
 }
 
+/* Section intro box (Main.astro with a desc-icon), after Blowfish's lead */
+.page-lead {
+  @apply bg-accent/10 mt-3 mb-6 flex items-center gap-3 rounded-md px-4 py-3;
+
+  & p {
+    @apply text-foreground/90;
+  }
+}
+
+.page-lead-icon {
+  @apply text-accent flex shrink-0 items-center;
+
+  & svg {
+    @apply size-6;
+  }
+}
+
 /* {{< center-image >}} */
 .center-image {
   @apply my-6 flex justify-center;

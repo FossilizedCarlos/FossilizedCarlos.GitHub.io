@@ -80,6 +80,14 @@ const places = defineCollection({
     draft: z.boolean().optional(),
     lat: z.number(),
     lon: z.number(),
+    /** `visit: no` marks a place I'd like to visit but haven't yet. */
+    visit: z.preprocess(
+      value =>
+        typeof value === "string"
+          ? !/^(no|n|false|off)$/i.test(value.trim())
+          : value,
+      z.boolean().default(true)
+    ),
     country: z.string().optional(),
     countryCode: z.string().optional(),
     placeName: z.string().optional(),

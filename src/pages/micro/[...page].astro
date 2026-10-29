@@ -2,8 +2,8 @@
 import type { GetStaticPaths } from "astro";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
-import Breadcrumb from "@/components/Breadcrumb.astro";
 import Main from "@/components/Main.astro";
+import IconFediverse from "@/assets/icons/IconFediverse.svg";
 import MicroEntry from "@/components/MicroEntry.astro";
 import Footer from "@/components/Footer.astro";
 import Pagination from "@/components/Pagination.astro";
@@ -25,9 +25,8 @@ const t = useTranslations(locale);
 <Layout title={`${t.pages.microTitle} | ${config.site.title}`}>
   <Header />
 
-  <Breadcrumb />
-
   <Main pageTitle={t.pages.microTitle} pageDesc={t.pages.microDesc}>
+    <IconFediverse slot="desc-icon" />
     <ul data-pagefind-body>
       {page.data.map(entry => <MicroEntry {entry} />)}
     </ul>

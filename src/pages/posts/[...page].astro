@@ -3,8 +3,8 @@ import type { GetStaticPaths } from "astro";
 import { getCollection } from "astro:content";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
-import Breadcrumb from "@/components/Breadcrumb.astro";
 import Main from "@/components/Main.astro";
+import IconEdit from "@/assets/icons/IconEdit.svg";
 import Card from "@/components/Card.astro";
 import Footer from "@/components/Footer.astro";
 import Pagination from "@/components/Pagination.astro";
@@ -26,9 +26,8 @@ const t = useTranslations(locale);
 <Layout title={`${t.pages.postsTitle} | ${config.site.title}`}>
   <Header />
 
-  <Breadcrumb />
-
   <Main pageTitle={t.pages.postsTitle} pageDesc={t.pages.postsDesc}>
+    <IconEdit slot="desc-icon" />
     <ul>
       {page.data.map(data => <Card {...data} />)}
     </ul>

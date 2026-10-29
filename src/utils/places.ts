@@ -76,6 +76,7 @@ export function toMapPlace(
     title: data.placeName ?? data.title,
     lat: data.lat,
     lon: data.lon,
+    visited: data.visit,
     url: getPlaceUrl(place.id, locale),
     country: data.country,
     location: data.placeLocation ?? data.country,

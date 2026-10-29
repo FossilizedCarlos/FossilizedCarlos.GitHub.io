@@ -64,7 +64,8 @@ export default {
       "All Micro Posts are syndicated to Mastodon, Micro.blog, and Bluesky.",
 
     placesTitle: "Places",
-    placesDesc: "A map of places I've been and liked.",
+    placesDesc:
+      "A map of places I've been and liked, or would like to visit some day.",
 
     archivesTitle: "Archives",
     archivesDesc: "All the articles I've archived.",

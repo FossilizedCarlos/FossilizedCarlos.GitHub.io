@@ -3,6 +3,8 @@ export type MapPlace = {
   title: string;
   lat: number;
   lon: number;
+  /** False for a place I'd like to visit; it gets a blue dot. */
+  visited: boolean;
   url?: string;
   country?: string;
   location?: string;
@@ -57,15 +59,36 @@ const { places, mode = "overview", class: className } = Astro.props;
   .places-map .leaflet-control-attribution a {
     color: inherit;
   }
-  .places-map .leaflet-bar a {
-    background: var(--background);
-    border-color: var(--border);
-    color: var(--foreground);
+  /* .leaflet-container raises specificity above leaflet.css, which loads later. */
+  .places-map.leaflet-container .leaflet-bar {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.15);
+    overflow: hidden;
   }
-  .places-map .leaflet-bar a:hover,
-  .places-map .leaflet-bar a:focus {
+  .places-map.leaflet-container .leaflet-bar a {
+    align-items: center;
+    background: var(--background);
+    border-bottom: 1px solid var(--border);
+    color: var(--foreground);
+    display: flex;
+    height: 32px;
+    justify-content: center;
+    width: 32px;
+  }
+  .places-map.leaflet-container .leaflet-bar a:last-child {
+    border-bottom: none;
+  }
+  .places-map.leaflet-container .leaflet-bar a:hover,
+  .places-map.leaflet-container .leaflet-bar a:focus-visible {
     background: var(--muted);
     color: var(--accent);
+  }
+  .places-map.leaflet-container .leaflet-bar a.leaflet-disabled {
+    background: var(--background);
+    color: var(--muted-foreground);
+    cursor: default;
+    opacity: 0.45;
   }
   .places-map .leaflet-popup-content-wrapper,
   .places-map .leaflet-popup-tip {
@@ -79,27 +102,19 @@ const { places, mode = "overview", class: className } = Astro.props;
     margin: 0.35rem 0 0;
     padding-left: 1rem;
   }
-  .places-cluster {
-    align-items: center;
-    background: var(--accent);
-    border-radius: 999px;
-    box-shadow: 0 5px 16px rgb(0 0 0 / 0.3);
-    color: var(--accent-foreground);
-    display: flex;
-    font-size: 0.82rem;
-    font-weight: 700;
-    justify-content: center;
-  }
   .places-point {
     background: var(--accent);
     border: 2px solid rgb(255 255 255 / 0.9);
     border-radius: 999px;
     box-shadow: 0 3px 12px rgb(0 0 0 / 0.35);
   }
-  .places-reset svg {
+  /* Same blue in light and dark mode. */
+  .places-point-wish {
+    background: #3b82f6;
+  }
+  .places-map-icon {
     fill: none;
     height: 16px;
-    margin: 7px;
     stroke: currentColor;
     stroke-linecap: round;
     stroke-linejoin: round;
@@ -114,6 +129,7 @@ const { places, mode = "overview", class: className } = Astro.props;
     title: string;
     lat: number;
     lon: number;
+    visited: boolean;
     url?: string;
     country?: string;
     location?: string;
@@ -190,9 +206,39 @@ const { places, mode = "overview", class: className } = Astro.props;
     });
   }
 
-  function pointIcon(L: Leaflet) {
+  const icon = (paths: string) =>
+    `<svg class="places-map-icon" viewBox="0 0 24 24" aria-hidden="true">${paths}</svg>`;
+
+  /**
+   * Zoom in, zoom out and, when given, reset in one bar, drawn as icons so
+   * all three match.
+   */
+  function addControls(L: Leaflet, map: Leaflet, reset?: () => void) {
+    const zoom = L.control
+      .zoom({
+        zoomInText: icon('<path d="M12 5v14"/><path d="M5 12h14"/>'),
+        zoomOutText: icon('<path d="M5 12h14"/>'),
+      })
+      .addTo(map);
+    if (!reset) return;
+
+    const link = L.DomUtil.create("a", "places-reset", zoom.getContainer());
+    link.href = "#";
+    link.title = "Reset map view";
+    link.setAttribute("role", "button");
+    link.setAttribute("aria-label", "Reset map view");
+    link.innerHTML = icon(
+      '<path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3L4.5 8.9"/><path d="M4.5 4.5v4.4h4.4"/>'
+    );
+    L.DomEvent.on(link, "click", (event: Event) => {
+      L.DomEvent.preventDefault(event);
+      reset();
+    });
+  }
+
+  function pointIcon(L: Leaflet, visited = true) {
     return L.divIcon({
-      className: "places-point",
+      className: visited ? "places-point" : "places-point places-point-wish",
       iconSize: [16, 16],
       iconAnchor: [8, 8],
       popupAnchor: [0, -8],
@@ -201,10 +247,14 @@ const { places, mode = "overview", class: className } = Astro.props;
 
   function initSingle(L: Leaflet, el: HTMLElement, place: Place) {
     const coords = [place.lat, place.lon];
-    const map = L.map(el, { scrollWheelZoom: false }).setView(coords, 13);
+    const map = L.map(el, { scrollWheelZoom: false, zoomControl: false }).setView(
+      coords,
+      13
+    );
     map.attributionControl.setPrefix(false);
+    addControls(L, map);
     themedTiles(L, map);
-    L.marker(coords, { icon: pointIcon(L) })
+    L.marker(coords, { icon: pointIcon(L, place.visited) })
       .bindPopup(
         `<strong>${escape(place.title)}</strong>${place.location ? `<br>${escape(place.location)}` : ""}`
       )
@@ -212,12 +262,13 @@ const { places, mode = "overview", class: className } = Astro.props;
   }
 
   function initOverview(L: Leaflet, el: HTMLElement, places: Place[]) {
-    const map = L.map(el, { worldCopyJump: true, minZoom: 2 });
+    const map = L.map(el, { worldCopyJump: true, minZoom: 2, zoomControl: false });
     map.attributionControl.setPrefix(false);
 
     type Country = { name: string; total: number; places: Place[] };
+    // Only visited places shade their country.
     const countries = places.reduce<Record<string, Country>>((acc, place) => {
-      if (!place.country) return acc;
+      if (!place.country || !place.visited) return acc;
       const key = place.country.toLowerCase();
       acc[key] ??= { name: place.country, total: 0, places: [] };
       acc[key].total += 1;
@@ -270,19 +321,21 @@ const { places, mode = "overview", class: className } = Astro.props;
         ? L.markerClusterGroup({
             maxClusterRadius: 56,
             showCoverageOnHover: false,
+            // A cluster is a plain dot; it is blue only when every place in it is.
             iconCreateFunction: (cluster: Leaflet) =>
-              L.divIcon({
-                html: `<span>${cluster.getChildCount()}</span>`,
-                className: "places-cluster",
-                iconSize: L.point(40, 40),
-              }),
+              pointIcon(
+                L,
+                cluster
+                  .getAllChildMarkers()
+                  .some((marker: Leaflet) => marker.options.visited)
+              ),
           })
         : L.featureGroup();
 
     for (const p of places) {
-      L.marker([p.lat, p.lon], { icon: pointIcon(L) })
+      L.marker([p.lat, p.lon], { icon: pointIcon(L, p.visited), visited: p.visited })
         .bindPopup(
-          `<strong><a href="${escape(p.url)}">${escape(p.title)}</a></strong>${p.summary ? `<br>${escape(p.summary)}` : ""}`
+          `<strong><a href="${escape(p.url)}">${escape(p.title)}</a></strong>${p.visited ? "" : "<br><em>Want to visit</em>"}${p.summary ? `<br>${escape(p.summary)}` : ""}`
         )
         .addTo(group);
     }
@@ -292,25 +345,7 @@ const { places, mode = "overview", class: className } = Astro.props;
     const reset = () => (bounds ? map.fitBounds(bounds) : map.setView([20, 0], 2));
     reset();
 
-    const ResetControl = L.Control.extend({
-      options: { position: "topleft" },
-      onAdd: () => {
-        const container = L.DomUtil.create("div", "leaflet-bar leaflet-control");
-        const link = L.DomUtil.create("a", "places-reset", container);
-        link.href = "#";
-        link.title = "Reset map view";
-        link.setAttribute("aria-label", "Reset map view");
-        link.innerHTML =
-          '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3L4.5 8.9"/><path d="M4.5 4.5v4.4h4.4"/></svg>';
-        L.DomEvent.disableClickPropagation(container);
-        L.DomEvent.on(link, "click", (event: Event) => {
-          L.DomEvent.preventDefault(event);
-          reset();
-        });
-        return container;
-      },
-    });
-    map.addControl(new ResetControl());
+    addControls(L, map, reset);
   }
 
   async function initMaps() {

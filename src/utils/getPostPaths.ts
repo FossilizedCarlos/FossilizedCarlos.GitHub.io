@@ -22,8 +22,8 @@ function getPostPathSegments(
       .filter(path => path !== "")
       .filter(path => !path.startsWith("_")) ?? [];
 
-  // A page bundle (`my-post/index.md`) is named by its folder, which is
-  // already the entry id, so drop the folder as well as the file name.
+  // Astro names `my-post/index.md` by its folder, so the folder is already
+  // the entry id: drop it as well as the file name.
   const isBundle = /^index\.mdx?$/.test(segments[segments.length - 1] ?? "");
 
   return segments

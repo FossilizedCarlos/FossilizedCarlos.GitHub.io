@@ -2,22 +2,9 @@ import { defineCollection, type SchemaContext } from "astro:content";
 import { z } from "astro/zod";
 import { glob } from "astro/loaders";
 import config from "@/config";
-import { slugifyStr } from "@/utils/slugify";
 
 export const BLOG_PATH = "src/content/posts";
 export const NOTES_PATH = "src/content/notes";
-
-/**
- * Page bundles (`my-post/index.md`) get the folder name as their id,
- * so Hugo-style bundles and flat files produce the same URLs.
- * File names with spaces become URL slugs (`My Note.md` → `my-note`).
- */
-const bundleId = ({ entry }: { entry: string }) =>
-  entry
-    .replace(/(\/index)?\.mdx?$/, "")
-    .split("/")
-    .map(slugifyStr)
-    .join("/");
 
 /** Blog posts and notes share one schema. */
 const articleSchema = ({ image }: SchemaContext) =>
@@ -40,7 +27,6 @@ const posts = defineCollection({
   loader: glob({
     pattern: "**/[^_]*.{md,mdx}",
     base: `./${BLOG_PATH}`,
-    generateId: bundleId,
   }),
   schema: articleSchema,
 });
@@ -49,7 +35,6 @@ const notes = defineCollection({
   loader: glob({
     pattern: "**/[^_]*.{md,mdx}",
     base: `./${NOTES_PATH}`,
-    generateId: bundleId,
   }),
   schema: articleSchema,
 });
@@ -65,20 +50,14 @@ const micro = defineCollection({
 
 const places = defineCollection({
   loader: glob({ pattern: "**/[^_]*.md", base: "./src/content/places" }),
-  schema: z.object({
+  schema: ({ image }) => z.object({
     title: z.string(),
     date: z.coerce.date(),
     draft: z.boolean().optional(),
     lat: z.number(),
     lon: z.number(),
-    /** `visit: no` marks a place I'd like to visit but haven't yet. */
-    visit: z.preprocess(
-      value =>
-        typeof value === "string"
-          ? !/^(no|n|false|off)$/i.test(value.trim())
-          : value,
-      z.boolean().default(true)
-    ),
+    /** `visit: false` marks a place I'd like to visit but haven't yet. */
+    visit: z.boolean().default(true),
     country: z.string().optional(),
     countryCode: z.string().optional(),
     placeName: z.string().optional(),
@@ -86,10 +65,11 @@ const places = defineCollection({
     placeAddress: z.string().optional(),
     appleMaps: z.string().optional(),
     openStreetMap: z.string().optional(),
+    /** Paths relative to the place file, e.g. `../../assets/places/babel/babel-1.jpeg`. */
     placeImages: z
       .array(
         z.object({
-          src: z.string(),
+          src: image(),
           alt: z.string().optional(),
           caption: z.string().optional(),
         })

@@ -13,8 +13,6 @@ import { getSortedEntries } from "@/utils/getSortedEntries";
 import IconX from "@/assets/icons/IconX.svg";
 import {
   getGalleryRows,
-  getPlaceImageSrc,
-  getPlacePhoto,
   getPlaceSummary,
   toMapPlace,
 } from "@/utils/places";
@@ -59,27 +57,23 @@ const photos = await Promise.all(
       fullOnPhone ? "100vw" : "50vw",
     ].join(", ");
 
-    const photo = getPlacePhoto(image.src);
-    let grid = { src: getPlaceImageSrc(image.src), srcset: "", sizes: "" };
-    let large = grid.src;
-    if (photo) {
-      const [gridImage, largeImage] = await Promise.all([
-        getImage({
-          src: photo,
-          width: Math.min(1000, photo.width),
-          widths: GRID_WIDTHS.filter(w => w < photo.width),
-          format: "webp",
-          quality: 80,
-        }),
-        getImage({ src: photo, width: Math.min(POPOVER_WIDTH, photo.width), format: "webp", quality: 82 }),
-      ]);
-      grid = { src: gridImage.src, srcset: gridImage.srcSet.attribute, sizes };
-      large = largeImage.src;
-    }
+    const photo = image.src;
+    const [gridImage, largeImage] = await Promise.all([
+      getImage({
+        src: photo,
+        width: Math.min(1000, photo.width),
+        widths: GRID_WIDTHS.filter(w => w < photo.width),
+        format: "webp",
+        quality: 80,
+      }),
+      getImage({ src: photo, width: Math.min(POPOVER_WIDTH, photo.width), format: "webp", quality: 82 }),
+    ]);
 
     return {
-      ...grid,
-      large,
+      src: gridImage.src,
+      srcset: gridImage.srcSet.attribute,
+      sizes,
+      large: largeImage.src,
       alt: image.alt ?? `${data.title} photo`,
       caption: image.caption,
       span,

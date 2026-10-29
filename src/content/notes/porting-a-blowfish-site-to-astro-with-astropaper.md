@@ -1,6 +1,6 @@
 ---
 title: "Porting a Blowfish site to Astro with AstroPaper"
-date: 2026-10-27T18:00:00+03:00
+pubDatetime: 2026-10-27T18:00:00+03:00
 description: How to move a Hugo Blowfish site with Blog, Notes, Micro, Places, and About sections to Astro and the AstroPaper theme, without changes to the markdown files.
 tags:
 - astro

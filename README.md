@@ -12,7 +12,7 @@ Carlos E. Barboza's site, ported from the Hugo [Blowfish](https://www.carlosbarb
 | Places  | `src/content/places/`  | `/places` |
 | About   | `src/content/pages/about.md` | `/about` |
 
-Content files use the Hugo front matter (`date`, `description`, `tags`) and can be a single file or a page bundle (`my-post/index.md`). The Hugo shortcodes `micro-social`, `prompt`, `alert` and `center-image` are rendered by `src/utils/remarkHugoShortcodes.ts`, so files can be copied in unchanged.
+Posts and notes are single files (`my-post.md`) with `pubDatetime`, `description` and `tags` in the front matter; the file name is the URL slug. Micro and places use `date`. The Hugo shortcodes `micro-social`, `prompt`, `alert` and `center-image` are rendered by `src/utils/remarkHugoShortcodes.ts`, so files can be copied in unchanged.
 
 Site settings (title, socials, posts per page) are in `astro-paper.config.ts`.
 

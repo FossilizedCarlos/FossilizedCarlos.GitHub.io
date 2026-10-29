@@ -1,6 +1,6 @@
 ---
 title: "Disabling IPv6 in Debian based LXC Containers"
-date: 2025-03-08T07:30:00
+pubDatetime: 2025-03-08T07:30:00
 description: How to programmatically disable IPv6 using terminal commands.
 tags:
 - proxmox

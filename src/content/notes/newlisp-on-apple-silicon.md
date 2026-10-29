@@ -1,6 +1,6 @@
 ---
 title: "newLISP on Apple Silicon"
-date: 2025-05-09T07:30:00-03:00
+pubDatetime: 2025-05-09T07:30:00-03:00
 description: This is the conversation I had with ChatGPT, in order to get the Makefile for newLISP to build on my M2 Mac, and correct some warnings due to C23 non-compliance.
 tags:
 - llm

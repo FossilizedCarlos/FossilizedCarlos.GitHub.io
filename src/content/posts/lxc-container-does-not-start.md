@@ -1,6 +1,6 @@
 ---
 title: LXC Container Does Not Start
-date: 2025-03-08T07:30:00
+pubDatetime: 2025-03-08T07:30:00
 description: How to update your LXC Debian version after an update, so it can start.
 ---
 

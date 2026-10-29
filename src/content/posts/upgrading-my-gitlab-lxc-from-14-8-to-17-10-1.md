@@ -1,6 +1,6 @@
 ---
 title: "Upgrading GitLab LXC from 14.8 to 17.10.1"
-date: 2025-03-31T07:30:00-03:00
+pubDatetime: 2025-03-31T07:30:00-03:00
 description: How to upgrade GitLab LXC from 14.8 to 17.10.1, ensuring all dependencies are updated as well in the process.
 tags:
 - proxmox

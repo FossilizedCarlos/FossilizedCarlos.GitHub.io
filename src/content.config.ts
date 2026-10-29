@@ -19,31 +19,22 @@ const bundleId = ({ entry }: { entry: string }) =>
     .map(slugifyStr)
     .join("/");
 
-/**
- * Blog posts and notes share one schema. Hugo front matter uses `date`,
- * AstroPaper uses `pubDatetime`; either is accepted.
- */
+/** Blog posts and notes share one schema. */
 const articleSchema = ({ image }: SchemaContext) =>
-  z.preprocess(
-    value => {
-      const data = value as Record<string, unknown>;
-      return { ...data, pubDatetime: data.pubDatetime ?? data.date };
-    },
-    z.object({
-      author: z.string().default(config.site.author),
-      pubDatetime: z.coerce.date(),
-      modDatetime: z.coerce.date().optional().nullable(),
-      title: z.string(),
-      featured: z.boolean().optional(),
-      draft: z.boolean().optional(),
-      tags: z.array(z.string()).default(["others"]),
-      ogImage: image().or(z.string()).optional(),
-      description: z.string().default(""),
-      canonicalURL: z.string().optional(),
-      hideEditPost: z.boolean().optional(),
-      timezone: z.string().optional(),
-    })
-  );
+  z.object({
+    author: z.string().default(config.site.author),
+    pubDatetime: z.coerce.date(),
+    modDatetime: z.coerce.date().optional().nullable(),
+    title: z.string(),
+    featured: z.boolean().optional(),
+    draft: z.boolean().optional(),
+    tags: z.array(z.string()).default(["others"]),
+    ogImage: image().or(z.string()).optional(),
+    description: z.string().default(""),
+    canonicalURL: z.string().optional(),
+    hideEditPost: z.boolean().optional(),
+    timezone: z.string().optional(),
+  });
 
 const posts = defineCollection({
   loader: glob({

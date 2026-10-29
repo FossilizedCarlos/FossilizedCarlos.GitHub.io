@@ -94,7 +94,8 @@ export default function remarkMicroSocial(this: unknown) {
   };
 
   const walk = (parent: Node, source: string) => {
-    parent.children = parent.children?.map(node => {
+    if (!parent.children) return;
+    parent.children = parent.children.map(node => {
       if (node.type === "paragraph") return rewriteParagraph(node, source);
       walk(node, source);
       return node;

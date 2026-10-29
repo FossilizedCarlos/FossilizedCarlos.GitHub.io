@@ -4,6 +4,9 @@ pubDatetime: 2025-03-08T07:30:00
 description: How to update your LXC Debian version after an update, so it can start.
 ---
 
+import { Image } from "astro:assets";
+import proxmox from "@/assets/images/proxmox.png";
+
 We experienced a few power outages over the last couple of days, so I did what any sane person does, and shut the server down... not really, the UPS ran out of juice unfortunately, but all is well. We regained power, and I began start up procedures. All my containers started up as usual, except the last 2. I had recently built a Jellyfin container on Debian 11, and a Plex container on the same OS. Everything else appeared fine, except I kept getting errors and no starts, and no real indications as to what was failing.
 
 ```text
@@ -36,12 +39,14 @@ lxc-start 111 20211102222139.759 DEBUG    conf - conf.c:run_buffer:312 -
 
 I noticed the `unsupported debian version '11.1'` and remembered a forum post[^1] about a Debian.pm file, so I went searching for it. The following commands allowed me to see the issue, which was my LXC OS being apparently higher than the one my version of Proxmox supported. Full disclosure: I am still running PVE 6.3-3, because I haven't learnt to update my VMs.
 
-{{< center-image
-  src="/assets/img/Proxmox.png"
-  alt="Neofetch screenshot showing current proxmox information"
-  title="Neofetch screenshot showing current proxmox information"
-  width="60%"
->}}
+<figure class="center-image">
+  <Image
+    src={proxmox}
+    alt="Neofetch screenshot showing current proxmox information"
+    title="Neofetch screenshot showing current proxmox information"
+    style="width: 60%"
+  />
+</figure>
 
 ```bash
 cat /<disk name>/subvol-111-disk-0/etc/debian_version

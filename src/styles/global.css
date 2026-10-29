@@ -42,9 +42,9 @@
   scroll-margin-block: 1rem;
 }
 
-/* ===== Hugo shortcodes carried over from the Blowfish site ===== */
+/* ===== Content components ===== */
 
-/* {{< micro-social >}} links */
+/* {{< micro-social >}} links (src/utils/remarkMicroSocial.ts) */
 .micro-social {
   display: inline-flex;
   margin-inline-start: 0.35rem;
@@ -91,18 +91,13 @@
   margin-bottom: 0;
 }
 
-/* {{< prompt >}} and {{< alert >}} boxes */
-.prompt-box,
-.alert-box {
-  @apply border-border my-6 rounded-lg border px-4 py-1;
+/* <Prompt> boxes (src/components/Prompt.astro) */
+.prompt-box {
+  @apply border-border bg-muted/30 my-6 rounded-lg border px-4 py-1;
 
   & > :first-child {
     margin-top: 0.75rem;
   }
-}
-
-.prompt-box {
-  @apply bg-muted/30;
 }
 
 .prompt-label {
@@ -111,10 +106,6 @@
   &::before {
     content: "> ";
   }
-}
-
-.alert-box {
-  @apply border-s-accent border-s-4;
 }
 
 /* Section intro box (Main.astro with a desc-icon), after Blowfish's lead */
@@ -134,7 +125,7 @@
   }
 }
 
-/* {{< center-image >}} */
+/* Centred <figure class="center-image"> in MDX posts */
 .center-image {
   @apply my-6 flex justify-center;
 

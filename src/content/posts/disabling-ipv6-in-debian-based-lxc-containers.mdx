@@ -7,6 +7,8 @@ tags:
 - lxc
 ---
 
+import Prompt from "@/components/Prompt.astro";
+
 
 I have been creating containers by hand for a bit now, as I start to create my own scripts, I wanted a single line command that disables IPv6. I found the solution in this article[^1] to be pretty much what I needed:
 ## For Ubuntu/Debian based Containers
@@ -47,7 +49,7 @@ I also found that you can simply issue commands[^4] like `sysctl -w net.ipv6.con
 ## But what does it all mean? 
 I am not a network engineer, so had not clue what I was doing, so I asked copilot to explain each line to me… and here is the response:
 
-{{< prompt >}}
+<Prompt>
 
 Can you explain the purpose of each of these lines in the sysctl.conf file?
 ```shell
@@ -57,7 +59,7 @@ net.ipv6.conf.lo.disable_ipv6 = 1
 net.ipv6.conf.eth0.disable_ipv6 = 1
 ```
 
-{{< /prompt >}}
+</Prompt>
 
 ### Response
 

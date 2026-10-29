@@ -12,7 +12,7 @@ Carlos E. Barboza's site, ported from the Hugo [Blowfish](https://www.carlosbarb
 | Places  | `src/content/places/`  | `/places` |
 | About   | `src/content/pages/about.md` | `/about` |
 
-Posts and notes are single files (`my-post.md`) with `pubDatetime`, `description` and `tags` in the front matter; the file name is the URL slug. Micro and places use `date`. The Hugo shortcodes `micro-social`, `prompt`, `alert` and `center-image` are rendered by `src/utils/remarkHugoShortcodes.ts`, so files can be copied in unchanged.
+Posts and notes are single files (`my-post.md`) with `pubDatetime`, `description` and `tags` in the front matter; the file name is the URL slug. Micro and places use `date`. Posts that need a component are `.mdx` files: the LLM prompt boxes use `src/components/Prompt.astro`, and images use Astro's `<Image>`. Micro posts still use the Hugo `micro-social` shortcode, because the app that writes them does; `src/utils/remarkMicroSocial.ts` renders it.
 
 Site settings (title, socials, posts per page) are in `astro-paper.config.ts`.
 

@@ -17,7 +17,7 @@ import {
   transformerNotationWordHighlight,
 } from "@shikijs/transformers";
 import { transformerFileName } from "./src/utils/transformers/fileName";
-import remarkHugoShortcodes from "./src/utils/remarkHugoShortcodes";
+import remarkMicroSocial from "./src/utils/remarkMicroSocial";
 import config from "./astro-paper.config";
 
 export default defineConfig({
@@ -39,7 +39,7 @@ export default defineConfig({
   markdown: {
     processor: unified({
       remarkPlugins: [
-        remarkHugoShortcodes,
+        remarkMicroSocial,
         remarkToc,
         [remarkCollapse, { test: "Table of contents" }],
       ],

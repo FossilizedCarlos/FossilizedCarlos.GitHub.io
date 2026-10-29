@@ -7,6 +7,8 @@ tags:
 - newlisp
 ---
 
+import Prompt from "@/components/Prompt.astro";
+
 The other day I was reminded of newLISP, so I decided to see what the language was up to, but I saw the forum had moved[^1] from its original domain[^2] to [newLISP Fan Club](https://newlispfanclub.com). The new forum admin appears to be [itistoday](https://newlispfanclub.com/index.php?action=profile;u=398), who maintains the newLISP web framework [Dragonfly](https://github.com/taoeffect/dragonfly-newlisp), and used to be pretty active based on my memory. Amazingly, my login worked, even having my extremely short history saved... great job by everyone involved in that transition.
 
 I did a little sleuthing through the forums, and it seems like 10.7.5 was the latest stable release by Lutz Mueller[^3], but other efforts have taken place to keep newLISP updated[^4]. I am not a professional programmer by any means, but I did do enough computer science at LSU to be dangerous. I decided to use GPT-4o to help me get the makefile built on my Apple Silicon M2, as I was not sure if the makefile would even run properly on Arm architecture.
@@ -19,7 +21,7 @@ Below you can see my saved conversation with GPT-4o. Assume anything not inside 
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 Would this make file be able to compile newLISP for Apple Silicon?
 
@@ -310,7 +312,7 @@ preparepdf:
 
 
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -411,11 +413,11 @@ Would you like a tailored `Makefile` or command snippet that guarantees native A
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 Yes please
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -509,11 +511,11 @@ Let me know if you'd like to include it as a `.pkg` installer, build with Homebr
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 Can you make me a list of the files make will look for, so I can include them please
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -604,7 +606,7 @@ Would you like a ready-made zip/tar list or a `.gitignore` -style manifest for p
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 
 
@@ -713,7 +715,7 @@ make: *** [default] Error 2
 
 
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -800,7 +802,7 @@ Would you like a fixed `configure` or Makefile version that bakes this in automa
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 
 
@@ -910,7 +912,7 @@ make: *** [default] Error 2
 
 
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -989,7 +991,7 @@ Would you like me to write you a `Makefile.macos_arm64_ffi` that bakes these fla
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 
 
@@ -1008,7 +1010,7 @@ rm -f makefile_build makefile_install config.h test-*
 
 
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -1054,7 +1056,7 @@ Would you like a reusable `Makefile.macos_arm64_ffi` target added so you can jus
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 
 
@@ -1130,7 +1132,7 @@ make: *** [nl-import.o] Error 1
 ```
 
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -1213,7 +1215,7 @@ Would you like me to provide a permanent `Makefile.macos_arm64_ffi` with all the
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 
 
@@ -1226,7 +1228,7 @@ ffi_prep_closure_loc (ffi_closure*,
 
 
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -1293,11 +1295,11 @@ Would you like me to give you a drop-in patched `nl-import.c` that uses `ffi_pre
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 Yes please
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -1365,11 +1367,11 @@ Let me know if you'd like the full patched `nl-import.c` file or a script that a
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 How can I check what version of newlisp?
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -1415,7 +1417,7 @@ Would you like to embed the version number into your binary or scripts automatic
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 
 
@@ -1426,7 +1428,7 @@ newLISP v.10.7.5 64-bit on OSX IPv4/6 UTF-8 libffi.
 
 
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -1456,7 +1458,7 @@ Would you like to package this into a `.pkg` installer, `.tgz`, or something for
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 Can you give me a command that says what kind of mac I have and on the next line it shows
 
@@ -1468,7 +1470,7 @@ Can you give me a command that says what kind of mac I have and on the next line
 
 
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -1499,11 +1501,11 @@ Let me know if you want a pretty formatted version saved as a script or alias.
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 How could I tell `./newlisp` to run a script in `~/Developer`
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -1550,11 +1552,11 @@ Let me know if you'd like help building a full script launcher or alias!
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 How can I ping a udp server? server listening on port 10001
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -1613,7 +1615,7 @@ Would you like a full newLISP script that sends a UDP message and waits for a re
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 Once I built newLISP, I still had all these warnings, what does it mean?
 
@@ -1731,7 +1733,7 @@ strip newlisp
 
 
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -1825,11 +1827,11 @@ Would you like a one-time script that patches the source files to clean up those
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 Yes, let's future proof please
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -1913,7 +1915,7 @@ It will be 100% local, and you can review everything before running.
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 Patch 2 is beefy, may I bother you to help me patch and replace this code block:
 
@@ -1979,7 +1981,7 @@ return(0);
 
 
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -2069,7 +2071,7 @@ Would you like me to create a patch file (`.diff`) you can apply with `patch -p1
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 
 
@@ -2196,7 +2198,7 @@ make: *** [default] Error 2
 
 
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -2303,7 +2305,7 @@ Let me know if you want a ready-made `.diff` file or patching script to apply th
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 
 
@@ -2439,7 +2441,7 @@ make: *** [default] Error 2
 
 
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -2520,7 +2522,7 @@ Would you like me to generate the full correct `callback0` to `callback14` block
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 Can you update what you think, and give it back to me?
 
@@ -4857,7 +4859,7 @@ next = next->next =  ffiTypeToCell(cif->arg_types[c], args[c]);
 
 
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -4917,11 +4919,11 @@ Would you like me to generate a `.diff` patch file or help you create a branch w
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 Can you fix the file and provide a download
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -4930,11 +4932,11 @@ Can you fix the file and provide a download
 I’ll need you to upload the `nl-import.c` file so I can apply the fix and provide a download link. Could you please upload it now?
 
 ---
-{{< prompt >}}
+<Prompt>
 
 **Uploaded a file**
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -4948,7 +4950,7 @@ This version removes the deprecated `extern int nanosleep();` declaration, makin
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 
 
@@ -5086,7 +5088,7 @@ make: *** [default] Error 2
 
 
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -5143,11 +5145,11 @@ LIBCALLBACK callback[] = {
 If you’d like, I can modify the fixed `nl-import.c` for you and provide a **new downloadable file** with the correct function ordering. Would you like me to do that now?
 
 ---
-{{< prompt >}}
+<Prompt>
 
 yes please
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -5161,7 +5163,7 @@ This version places the `callback0` through `callback15` functions correctly bef
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 
 
@@ -5299,7 +5301,7 @@ make: *** [default] Error 2
 
 
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -5313,7 +5315,7 @@ Replace your existing file with this one, then run `make` again. Let me know if 
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 Are these all the same errors over and over?
 
@@ -5451,7 +5453,7 @@ make: *** [default] Error 2
 
 
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -5508,11 +5510,11 @@ If the build still fails after that, let me know and I’ll help with the next e
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 Why are you failing to correct them if you can point them out?
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -5563,11 +5565,11 @@ Would you like me to proceed and give you that cleaned up, working `nl-import.c`
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 yes
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -5581,7 +5583,7 @@ This version moves the `callback0` through `callback15` function definitions abo
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 Are these the same errors? Which means you are potentially not correcting things, but saying you are:
 
@@ -5697,7 +5699,7 @@ make: *** [nl-import.o] Error 1
 
 
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -5750,7 +5752,7 @@ Let me know if you'd like me to re-confirm that the `.c` file you were using was
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 They look exactly the same:
 
@@ -5866,7 +5868,7 @@ make: *** [nl-import.o] Error 1
 
 
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -5950,7 +5952,7 @@ Would you like me to regenerate and send you the **fully corrected** `nl-import.
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 Please correct:
 
@@ -8330,19 +8332,19 @@ next = next->next =  ffiTypeToCell(cif->arg_types[c], args[c]);
 
 
 
-{{< /prompt >}}
+</Prompt>
 
 
 
 ---
 
 ---
-{{< prompt >}}
+<Prompt>
 
-**Uploaded a file**<br>
+**Uploaded a file**<br />
 Please correct the errors in the file
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -8356,7 +8358,7 @@ Let me know if you'd like help rebuilding or testing it.
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 Is this still the command I should use?
 
@@ -8370,7 +8372,7 @@ make -f makefile_darwinLP64_utf8_ffi
 
 
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -8409,7 +8411,7 @@ Would you like help verifying that the new binary was built correctly afterward?
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 
 
@@ -8533,7 +8535,7 @@ make: *** [nl-import.o] Error 1
 
 
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -8602,11 +8604,11 @@ Would you like me to verify that all callback logic is preserved correctly too?
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 Listen, you keep saying the same thing... and the file linked doesn't exist...
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -8620,14 +8622,14 @@ You can replace the original `nl-import.c` with this version and run the same `m
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
-**Uploaded a file**<br>
+**Uploaded a file**<br />
 **Uploaded a file**
 
 Is there any difference between these files?
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -8655,7 +8657,7 @@ Would you like me to repackage and provide this corrected file directly for down
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 This was working, I asked about making some warninngs go away, you said you fixed... now it is not working. The question is, how can I help you stay on track and make sure you actually do the correction properly? Feels like you lose track, is your context full?
 
@@ -8774,7 +8776,7 @@ make: *** [nl-import.o] Error 1
 
 
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -8841,7 +8843,7 @@ Would you like me to send that now?
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 **Uploaded a file**
 
@@ -8920,7 +8922,7 @@ strip newlisp
 
 
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -9006,7 +9008,7 @@ Would you like me to isolate and list *just* the lines to change and paste them 
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 This is very difficult to implement, I want you to give me a line number to replace, and what to replace. If a whole block is needed, provide the whole block. 
 This:
@@ -9043,7 +9045,7 @@ switch(count) {
 
 Make it difficult to navigate, so let's focus on fixing by line number or block with starting line number. Also, consider if we are introducing further errors into the file.
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -9079,7 +9081,7 @@ This explicitly casts the function pointer to one with the proper prototype — 
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 Does this mean grab line 260, and insert this:
 
@@ -9095,7 +9097,7 @@ return ((stdcall_fn1)function)(args[0]);
 
 See what I mean? What are those 3 dots? Line by line, or block by block... no room for interpretation.
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -9124,13 +9126,13 @@ Let me know when you're ready for the next one (line 263). Want to fix them all 
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 Give me like this:
-Replace 260 with `return ((stdcall_fn1)function)(args[0]);` <br>
+Replace 260 with `return ((stdcall_fn1)function)(args[0]);` <br />
 And list them all
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -9227,7 +9229,7 @@ Once you've applied these, the deprecated non-prototype warnings in `stdcallFunc
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 
 
@@ -9329,7 +9331,7 @@ strip newlisp
 
 
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -9386,7 +9388,7 @@ Would you like to tackle the `nanosleep()` warning next?
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 
 
@@ -9470,7 +9472,7 @@ make: *** [nl-import.o] Error 1
 
 
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -9557,7 +9559,7 @@ Ready to clean up the `nanosleep()` warning next?
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 
 
@@ -9600,7 +9602,7 @@ make: *** [default] Error 1
 
 
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -9677,12 +9679,12 @@ Want to address the `nanosleep()` warning next?
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
-**Uploaded a file**<br>
+**Uploaded a file**<br />
 This is the current file, what do I need to fix?
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -9763,11 +9765,11 @@ Once added, recompile with the same `make` command. That should resolve the link
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 `Use of undeclared identifier 'ffi\_fn0'`
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -9824,7 +9826,7 @@ Would you like me to generate a fully corrected version of your `nl-import.c` fi
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
 Nice, does this mean it worked?
 
@@ -9863,7 +9865,7 @@ strip newlisp
 
 
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -9885,10 +9887,10 @@ Do you want help setting up a `make` alias or wrapper to simplify future builds 
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
-Can you archive this whole interaction in a markdown file? You can make all my prompts in a comment using >, as they come up, and you can just use the file as you need in order to answer and display code. For example, our last short interaction can be like:<br>
-**Me**:  Use of undeclared identifier 'ffi\_fn0'<br>
+Can you archive this whole interaction in a markdown file? You can make all my prompts in a comment using >, as they come up, and you can just use the file as you need in order to answer and display code. For example, our last short interaction can be like:<br />
+**Me**:  Use of undeclared identifier 'ffi\_fn0'<br />
 **You**: Thanks — that confirms the second missing piece. The `ffi_fn0, ffi_fn1, …, ffi_fn14` types must be declared before they’re used in the `cdeclFunction()` implementation. These are typically declared as:
 
 
@@ -9905,7 +9907,7 @@ typedef uintptr_t (*ffi_fn14)(uintptr_t, uintptr_t, ..., uintptr_t); // 14 param
 
 Does that make sense? Give me a markdown file of this whole interaction please.
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -9919,12 +9921,12 @@ Let me know if you want me to add more from our session or structure it differen
 
 ---
 
-{{< prompt >}}
+<Prompt>
 
-Man, that is a terrible interpretation of what I said lol<br>
+Man, that is a terrible interpretation of what I said lol<br />
 Don't worry, I will figure out how to save it for us.
 
-{{< /prompt >}}
+</Prompt>
 
 
 
@@ -9939,11 +9941,11 @@ Totally fair — I got a bit too “summary mode” on that one. If you want, I 
 Would you like me to try again and give you a proper, faithful markdown transcript?
 
 ---
-{{< prompt >}}
+<Prompt>
 
 Yes please
 
-{{< /prompt >}}
+</Prompt>
 
 
 

@@ -631,6 +631,93 @@ The build makes 33 pages. The search index has the blog posts, the notes, the mi
 
 To add content, put a markdown file in the folder of the section. Use the same front matter as in Hugo.
 
+## Cleanup after the port
+
+When the site worked, a second procedure changed the code and the content to use Astro conventions. The Hugo workarounds became unnecessary. The URLs and the text of the pages did not change. A build before and after each step made sure of this.
+
+After this cleanup, the front matter instruction in [Result](#result) applies only to micro posts and places.
+
+### 1. Use single files for posts and notes
+
+Hugo page bundles (`my-post/index.md`) that contain only one file become single files (`my-post.md`). File names use lowercase words with hyphens. The file name is the URL slug.
+
+Astro gives the folder name to an `index.md` file, and it changes file names into slugs. Thus, the `bundleId` function in `src/content.config.ts` is not necessary, and the collections use the default IDs.
+
+### 2. Use the AstroPaper date field
+
+Posts and notes use `pubDatetime`, not `date`. The schema does not change `date` into `pubDatetime` now. Micro posts and places continue to use `date`.
+
+Use this front matter for a new post or note:
+
+```yaml
+---
+title: "My post"
+pubDatetime: 2026-10-29T18:00:00+03:00
+description: One sentence about the post.
+tags:
+- astro
+---
+```
+
+### 3. Let Astro find the place photos
+
+The `src` of each item in `placeImages` is a path from the place file to the photo:
+
+```yaml
+placeImages:
+  - src: "../../assets/places/babel/babel-1.jpeg"
+    alt: "Babel Restaurant and Kuwait waterfront at dusk"
+```
+
+The schema uses the `image()` function. Astro finds each photo during the build. If a path is not correct, the build stops. This replaces the functions in `src/utils/places.ts` that removed `/Blowfish` from the paths and searched `src/assets/places/`.
+
+The `visit` field is a boolean. Use `visit: false` for a place that you want to visit in the future.
+
+### 4. Replace shortcodes with MDX components
+
+| Hugo shortcode | Astro replacement |
+| --- | --- |
+| `{{< prompt >}}` and `{{< /prompt >}}` | `<Prompt>` and `</Prompt>`, from `src/components/Prompt.astro` |
+| `{{< center-image >}}` | `<Image>` from `astro:assets`, in `<figure class="center-image">` |
+| `{{< alert >}}` | None. No file used it. Use a callout, for example `> [!NOTE]`. |
+
+A file that uses a component must have the `.mdx` extension. Import the component after the front matter:
+
+```mdx
+---
+title: "newLISP on Apple Silicon"
+pubDatetime: 2025-05-09T07:30:00-03:00
+---
+
+import Prompt from "@/components/Prompt.astro";
+
+<Prompt>
+
+Would this make file be able to compile newLISP for Apple Silicon?
+
+</Prompt>
+```
+
+MDX has stricter rules than markdown. Outside of code, `<` starts a tag and `{` starts an expression. Close all HTML tags, for example `<br />`, not `<br>`.
+
+The image of the LXC post moved from `public/assets/img/` to `src/assets/images/`. Astro changes the images in `src/` into WebP files of the correct size.
+
+The `center-image` shortcode of the LXC post did not render after the port. It used more than one line, and markdown read the line `>}}` as the start of a quote. Thus, the page showed the text of the shortcode. The `<Image>` component does not have this problem.
+
+### 5. Keep only the micro-social shortcode
+
+The tool that writes micro posts still writes `{{< micro-social >}}` shortcodes. Thus, the site keeps one remark plugin, `src/utils/remarkMicroSocial.ts`. This plugin renders only the `micro-social` shortcode.
+
+### 6. Change the micro posts
+
+This step is not done. When it is done, the cleanup is complete, and the site uses no Hugo shortcodes.
+
+1. Change the tool to write the syndication links in the front matter, not as shortcodes.
+2. Add a field for these links to the micro schema in `src/content.config.ts`.
+3. Show the links in `src/components/MicroEntry.astro`.
+4. Move the links of the existing micro posts into the front matter.
+5. Remove `src/utils/remarkMicroSocial.ts` and its line in `astro.config.ts`.
+
 ---
 
 Converted by Claude Opus 5.5 Medium

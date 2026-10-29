@@ -46,12 +46,18 @@ I also found that you can simply issue commands[^4] like `sysctl -w net.ipv6.con
 
 ## But what does it all mean? 
 I am not a network engineer, so had not clue what I was doing, so I asked copilot to explain each line to me… and here is the response:
-### Prompt
-> Can you explain the purpose of each of these lines in the sysctl.conf file? 
-> net.ipv6.conf.all.disable_ipv6 = 1 
-> net.ipv6.conf.default.disable_ipv6 = 1 
-> net.ipv6.conf.lo.disable_ipv6 = 1 
-> net.ipv6.conf.eth0.disable_ipv6 = 1
+
+{{< prompt >}}
+
+Can you explain the purpose of each of these lines in the sysctl.conf file?
+```shell
+net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv6.conf.default.disable_ipv6 = 1
+net.ipv6.conf.lo.disable_ipv6 = 1
+net.ipv6.conf.eth0.disable_ipv6 = 1
+```
+
+{{< /prompt >}}
 
 ### Response
 

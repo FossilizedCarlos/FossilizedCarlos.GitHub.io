@@ -22,6 +22,9 @@ import config from "./astro-paper.config";
 
 export default defineConfig({
   site: config.site.url,
+  // ClientRouter prefetches on hover, which phones never send. Fetch links
+  // as they scroll into view, so a tap shows the page at once.
+  prefetch: { prefetchAll: true, defaultStrategy: "viewport" },
   integrations: [
     mdx(),
     sitemap({

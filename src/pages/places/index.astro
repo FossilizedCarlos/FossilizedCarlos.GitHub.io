@@ -7,7 +7,7 @@ import Footer from "@/components/Footer.astro";
 import Datetime from "@/components/Datetime.astro";
 import PlacesMap from "@/components/PlacesMap.astro";
 import { getSortedEntries } from "@/utils/getSortedEntries";
-import { getPlaceSummary, getPlaceUrl, toMapPlace } from "@/utils/places";
+import { getPlaceParagraphs, getPlaceUrl, toMapPlace } from "@/utils/places";
 import { useTranslations } from "@/i18n";
 import config from "@/config";
 
@@ -42,7 +42,9 @@ const byCountry = Object.entries(
                 <h3>{place.data.title}</h3>
               </a>
               <Datetime pubDatetime={place.data.date} />
-              <p>{getPlaceSummary(place)}</p>
+              {getPlaceParagraphs(place).map(paragraph => (
+                <p class="mt-2">{paragraph}</p>
+              ))}
             </li>
           ))
         }

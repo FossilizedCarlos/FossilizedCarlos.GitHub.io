@@ -159,7 +159,9 @@ const photos = await Promise.all(
                     decoding="async"
                   />
                 </button>
-                {caption && <figcaption>{caption}</figcaption>}
+                {caption && (
+                  <figcaption style={`--caption-chars: ${caption.length}`}>{caption}</figcaption>
+                )}
               </figure>
             ))}
           </div>
@@ -193,6 +195,7 @@ const photos = await Promise.all(
   }
   .place-gallery figure {
     aspect-ratio: 4 / 3;
+    container-type: inline-size;
     border: 1px solid var(--border);
     border-radius: 6px;
     margin: 0;
@@ -239,9 +242,19 @@ const photos = await Promise.all(
     background: linear-gradient(to top, rgb(0 0 0 / 0.55), transparent);
     bottom: 0;
     color: #fff;
-    font-size: 0.85rem;
+    /*
+     * Shrink to fit the caption on one line: the font is monospaced, so each
+     * character is about 0.62em wide. Below 0.6rem, the caption wraps.
+     */
+    font-size: clamp(
+      0.6rem,
+      (100cqi - 1.5rem) / (var(--caption-chars, 1) * 0.62),
+      0.85rem
+    );
     font-weight: 600;
     left: 0;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
     padding: 1.5rem 0.75rem 0.5rem;
     pointer-events: none;
     position: absolute;

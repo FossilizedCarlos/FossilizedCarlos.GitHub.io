@@ -51,12 +51,13 @@ const { places, mode = "overview", class: className } = Astro.props;
   [data-theme="dark"] .places-map .leaflet-tile-pane {
     filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9);
   }
-  .places-map .leaflet-control-attribution {
-    background: color-mix(in srgb, var(--background) 75%, transparent);
-    color: var(--muted-foreground);
+  /* Light-mode colours in both themes, as leaflet.css keeps a light background. */
+  .places-map.leaflet-container .leaflet-control-attribution {
+    background: rgb(255 255 255 / 0.8);
+    color: #4b5563;
     font-size: 10px;
   }
-  .places-map .leaflet-control-attribution a {
+  .places-map.leaflet-container .leaflet-control-attribution a {
     color: inherit;
   }
   /* .leaflet-container raises specificity above leaflet.css, which loads later. */

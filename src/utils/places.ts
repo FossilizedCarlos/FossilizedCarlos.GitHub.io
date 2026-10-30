@@ -28,13 +28,19 @@ export function getGalleryRows(count: number): number[] {
   return rows;
 }
 
-/** Plain-text summary of a place's markdown body. */
-export function getPlaceSummary(place: CollectionEntry<"places">): string {
+/** Plain-text paragraphs of a place's markdown body. */
+export function getPlaceParagraphs(place: CollectionEntry<"places">): string[] {
   return (place.body ?? "")
     .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
     .replace(/[*_`>#]/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
+    .split(/\n\s*\n/)
+    .map(paragraph => paragraph.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+}
+
+/** Plain-text summary of a place's markdown body. */
+export function getPlaceSummary(place: CollectionEntry<"places">): string {
+  return getPlaceParagraphs(place).join(" ");
 }
 
 export function toMapPlace(
@@ -50,6 +56,7 @@ export function toMapPlace(
     url: getPlaceUrl(place.id, locale),
     country: data.country,
     location: data.placeLocation ?? data.country,
-    summary: getPlaceSummary(place),
+    // The first paragraph keeps the map popup short.
+    summary: getPlaceParagraphs(place)[0],
   };
 }

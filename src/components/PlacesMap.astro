@@ -146,6 +146,21 @@ const { places, mode = "overview", class: className } = Astro.props;
   const ATTRIBUTION =
     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
+  // Subresource Integrity hashes: the browser refuses CDN files that differ
+  // from the reviewed releases. Update these when a version above changes.
+  const INTEGRITY: Record<string, string> = {
+    [`${LEAFLET}/leaflet.css`]:
+      "sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H",
+    [`${LEAFLET}/leaflet.js`]:
+      "sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH",
+    [`${CLUSTER}/MarkerCluster.css`]:
+      "sha384-pmjIAcz2bAn0xukfxADbZIb3t8oRT9Sv0rvO+BR5Csr6Dhqq+nZs59P0pPKQJkEV",
+    [`${CLUSTER}/MarkerCluster.Default.css`]:
+      "sha384-wgw+aLYNQ7dlhK47ZPK7FRACiq7ROZwgFNg0m04avm4CaXS+Z9Y7nMu8yNjBKYC+",
+    [`${CLUSTER}/leaflet.markercluster.js`]:
+      "sha384-eXVCORTRlv4FUUgS/xmOyr66XBVraen8ATNLMESp92FKXLAMiKkerixTiBvXriZr",
+  };
+
   const loaded = new Map<string, Promise<void>>();
 
   function load(url: string): Promise<void> {
@@ -153,12 +168,14 @@ const { places, mode = "overview", class: className } = Astro.props;
       loaded.set(
         url,
         new Promise((resolve, reject) => {
+          const sri = { integrity: INTEGRITY[url], crossOrigin: "anonymous" };
           const el = url.endsWith(".css")
             ? Object.assign(document.createElement("link"), {
                 rel: "stylesheet",
                 href: url,
+                ...sri,
               })
-            : Object.assign(document.createElement("script"), { src: url });
+            : Object.assign(document.createElement("script"), { src: url, ...sri });
           el.addEventListener("load", () => resolve());
           el.addEventListener("error", reject);
           document.head.appendChild(el);

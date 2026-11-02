@@ -3,7 +3,7 @@ title: "Uchi"
 date: 2015-09-01
 lat: 29.7448938
 lon: -95.3907229
-country: "United States of America"
+country: "United States"
 countryCode: "US"
 ---
 

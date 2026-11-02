@@ -3,7 +3,7 @@ title: "Minuted Maid Park"
 date: 2025-07-13
 lat: 29.7572014
 lon: -95.35525
-country: "United States of America"
+country: "United States"
 countryCode: "US"
 ---
 

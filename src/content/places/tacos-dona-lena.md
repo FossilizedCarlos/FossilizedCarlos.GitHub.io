@@ -3,7 +3,7 @@ title: "Tacos Doña Lena"
 date: 2022-07-01
 lat: 29.8114261
 lon: -95.5102716
-country: "United States of America"
+country: "United States"
 countryCode: "US"
 ---
 

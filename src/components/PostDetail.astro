@@ -302,6 +302,20 @@ const ogImage = ogImageUrl
         "max-h-[90dvh] max-w-[90dvw] cursor-default object-contain";
 
       overlay.append(closeButton, image);
+
+      // A credited image (see rehypeImageSource) keeps its source link.
+      const source = trigger?.closest("figure")?.querySelector("figcaption a");
+      if (source) {
+        overlay.classList.add("flex-col", "gap-3");
+        image.classList.replace("max-h-[90dvh]", "max-h-[85dvh]");
+        const caption = document.createElement("p");
+        caption.className = "text-sm text-white";
+        const link = source.cloneNode(true);
+        link.className =
+          "text-white underline decoration-dashed underline-offset-4 hover:decoration-solid";
+        caption.append(link);
+        overlay.append(caption);
+      }
       overlay.addEventListener("click", e => {
         if (e.target === overlay && currentScale <= 1) close();
       });

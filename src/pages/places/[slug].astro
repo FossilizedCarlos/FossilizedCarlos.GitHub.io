@@ -46,6 +46,9 @@ const CONTENT_WIDTH = 1024;
 const GRID_WIDTHS = [400, 700, 1000, 1400];
 const POPOVER_WIDTH = 1600;
 
+// A caption that is only a URL links back to the photo's source.
+const isUrl = (text?: string) => !!text && /^https?:\/\/\S+$/.test(text);
+
 const photos = await Promise.all(
   data.placeImages.map(async (image, index) => {
     const span = spans[index];
@@ -76,6 +79,7 @@ const photos = await Promise.all(
       large: largeImage.src,
       alt: image.alt ?? `${data.title} photo`,
       caption: image.caption,
+      captionHref: isUrl(image.caption) ? image.caption : undefined,
       span,
       fullOnPhone,
     };
@@ -140,7 +144,7 @@ const photos = await Promise.all(
         <section class="mt-10" aria-label="Photos">
           <h2 class="mb-4 text-xl font-semibold">Photos</h2>
           <div class:list={["place-gallery", { single: photos.length === 1 }]}>
-            {photos.map(({ src, srcset, sizes, large, alt, caption, span, fullOnPhone }) => (
+            {photos.map(({ src, srcset, sizes, large, alt, caption, captionHref, span, fullOnPhone }) => (
               <figure class:list={[`span-${span}`, { "full-on-phone": fullOnPhone }]}>
                 <button
                   type="button"
@@ -160,7 +164,15 @@ const photos = await Promise.all(
                   />
                 </button>
                 {caption && (
-                  <figcaption style={`--caption-chars: ${caption.length}`}>{caption}</figcaption>
+                  <figcaption style={`--caption-chars: ${caption.length}`}>
+                    {captionHref ? (
+                      <a href={captionHref} target="_blank" rel="noopener">
+                        {caption}
+                      </a>
+                    ) : (
+                      caption
+                    )}
+                  </figcaption>
                 )}
               </figure>
             ))}
@@ -260,6 +272,18 @@ const photos = await Promise.all(
     position: absolute;
     right: 0;
   }
+  /* Clicks pass through the caption to the photo, except on a source link. */
+  .place-gallery figcaption a,
+  .photo-dialog-caption a {
+    color: inherit;
+    pointer-events: auto;
+    text-decoration: underline dashed;
+    text-underline-offset: 4px;
+  }
+  .place-gallery figcaption a:hover,
+  .photo-dialog-caption a:hover {
+    text-decoration-style: solid;
+  }
 
   /* Popover: the whole photo, a little wider than the content column. */
   .photo-dialog {
@@ -327,7 +351,17 @@ const photos = await Promise.all(
       button.addEventListener("click", () => {
         image.src = button.dataset.src ?? "";
         image.alt = button.dataset.alt ?? "";
-        caption.textContent = button.dataset.caption ?? "";
+        const text = button.dataset.caption ?? "";
+        if (/^https?:\/\/\S+$/.test(text)) {
+          const link = document.createElement("a");
+          link.href = text;
+          link.target = "_blank";
+          link.rel = "noopener";
+          link.textContent = text;
+          caption.replaceChildren(link);
+        } else {
+          caption.textContent = text;
+        }
         dialog.showModal();
       });
     }

@@ -29,8 +29,10 @@ export default defineConfig({
   integrations: [
     mdx(),
     sitemap({
+      // /agents/ is unlisted: keep it out of the sitemap.
       filter: page =>
-        config.features?.showArchives !== false || !page.endsWith("/archives/"),
+        !new URL(page).pathname.startsWith("/agents/") &&
+        (config.features?.showArchives !== false || !page.endsWith("/archives/")),
     }),
   ],
   i18n: {

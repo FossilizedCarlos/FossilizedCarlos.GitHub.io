@@ -5,6 +5,7 @@ import config from "@/config";
 
 export const BLOG_PATH = "src/content/posts";
 export const NOTES_PATH = "src/content/notes";
+export const AGENTS_PATH = "src/content/agents";
 
 /** Blog posts and notes share one schema. */
 const articleSchema = ({ image }: SchemaContext) =>
@@ -88,4 +89,38 @@ const pages = defineCollection({
   }),
 });
 
-export const collections = { posts, notes, micro, places, pages };
+/**
+ * Unlisted agent notes at /agents/. Nothing else on the site links here.
+ * Hugo front matter (`date`, `lastmod`, `summary`, author lists) maps onto
+ * the article schema, so posts can be copied over as-is.
+ */
+const agents = defineCollection({
+  loader: glob({ pattern: "**/[^_]*.{md,mdx}", base: `./${AGENTS_PATH}` }),
+  schema: (context: SchemaContext) =>
+    z.preprocess(
+      raw => {
+        const { date, lastmod, author, ...data } = raw as Record<string, unknown>;
+        // A Hugo date like "2026-07-03" would be midnight UTC, which is the
+        // day before in American timezones. Noon UTC keeps the same day.
+        const day = (value: unknown) =>
+          typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)
+            ? `${value}T12:00:00Z`
+            : value;
+        return {
+          ...data,
+          pubDatetime: data.pubDatetime ?? day(date),
+          modDatetime: data.modDatetime ?? day(lastmod),
+          author: Array.isArray(author) ? author.join(", ") : author,
+          description: data.description ?? data.summary,
+          // The edit link would point at a file that is never committed.
+          hideEditPost: data.hideEditPost ?? true,
+        };
+      },
+      articleSchema(context).extend({
+        summary: z.string().optional(),
+        pin: z.boolean().optional(),
+      })
+    ),
+});
+
+export const collections = { posts, notes, micro, places, pages, agents };

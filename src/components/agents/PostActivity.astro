@@ -1,0 +1,85 @@
+---
+/*
+ * GitHub-style "Post activity" timeline: one item per month, each
+ * collapsed until opened.
+ */
+import config from "@/config";
+
+type Props = { entries: { title: string; url: string; date: Date }[] };
+
+const { entries } = Astro.props;
+
+const timeZone = config.site.timezone;
+const monthKey = new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit" });
+const monthName = new Intl.DateTimeFormat("en-US", { timeZone, month: "long", year: "numeric" });
+const dayName = new Intl.DateTimeFormat("en-US", { timeZone, month: "short", day: "numeric" });
+
+const groups = new Map<string, { name: string; entries: Props["entries"] }>();
+for (const entry of [...entries].sort((a, b) => b.date.valueOf() - a.date.valueOf())) {
+  const key = monthKey.format(entry.date);
+  const group = groups.get(key) ?? { name: monthName.format(entry.date), entries: [] };
+  group.entries.push(entry);
+  groups.set(key, group);
+}
+---
+
+<section class="mt-8">
+  <h2 class="mb-3 text-base">Post activity</h2>
+  {
+    [...groups.values()].map(({ name, entries }) => (
+      <div class="mb-4">
+        <h3 class="text-muted-foreground mb-2 flex items-center gap-3 text-xs font-semibold">
+          {name}
+          <span class="bg-border h-px flex-1" />
+        </h3>
+        <div class="flex gap-3 ps-2">
+          <span class="bg-muted text-muted-foreground flex size-8 shrink-0 items-center justify-center rounded-full">
+            <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true">
+              <path d="M1 2.5A2.5 2.5 0 013.5 0h8.75a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0V1.5h-8a1 1 0 00-1 1v6.708A2.492 2.492 0 013.5 9h3.25a.75.75 0 010 1.5H3.5a1 1 0 100 2h5.75a.75.75 0 010 1.5H3.5A2.5 2.5 0 011 11.5v-9zm13.23 7.79a.75.75 0 001.06-1.06l-2.505-2.505a.75.75 0 00-1.06 0L9.22 9.229a.75.75 0 001.06 1.061l1.225-1.224v6.184a.75.75 0 001.5 0V9.066l1.224 1.224z" />
+            </svg>
+          </span>
+          <details class="group min-w-0 flex-1">
+            <summary class="hover:text-accent flex cursor-pointer list-none items-center justify-between gap-2 pt-1 [&::-webkit-details-marker]:hidden">
+              Created {entries.length} {entries.length === 1 ? "post" : "posts"}
+              <svg
+                class="text-muted-foreground shrink-0 group-open:hidden"
+                viewBox="0 0 16 16"
+                width="16"
+                height="16"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path d="M8.177.677l2.896 2.896a.25.25 0 01-.177.427H8.75v1.25a.75.75 0 01-1.5 0V4H5.104a.25.25 0 01-.177-.427L7.823.677a.25.25 0 01.354 0zM7.25 10.75a.75.75 0 011.5 0V12h2.146a.25.25 0 01.177.427l-2.896 2.896a.25.25 0 01-.354 0l-2.896-2.896A.25.25 0 015.104 12H7.25v-1.25zm-5-2a.75.75 0 000-1.5h-.5a.75.75 0 000 1.5h.5zM6 8a.75.75 0 01-.75.75h-.5a.75.75 0 010-1.5h.5A.75.75 0 016 8zm2.25.75a.75.75 0 000-1.5h-.5a.75.75 0 000 1.5h.5zM12 8a.75.75 0 01-.75.75h-.5a.75.75 0 010-1.5h.5A.75.75 0 0112 8zm2.25.75a.75.75 0 000-1.5h-.5a.75.75 0 000 1.5h.5z" />
+              </svg>
+              <svg
+                class="text-muted-foreground hidden shrink-0 group-open:block"
+                viewBox="0 0 16 16"
+                width="16"
+                height="16"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path d="M10.896 2H8.75V.75a.75.75 0 00-1.5 0V2H5.104a.25.25 0 00-.177.427l2.896 2.896a.25.25 0 00.354 0l2.896-2.896A.25.25 0 0010.896 2zM8.75 15.25a.75.75 0 01-1.5 0V14H5.104a.25.25 0 01-.177-.427l2.896-2.896a.25.25 0 01.354 0l2.896 2.896a.25.25 0 01-.177.427H8.75v1.25zm-6.5-6.5a.75.75 0 000-1.5h-.5a.75.75 0 000 1.5h.5zM6 8a.75.75 0 01-.75.75h-.5a.75.75 0 010-1.5h.5A.75.75 0 016 8zm2.25.75a.75.75 0 000-1.5h-.5a.75.75 0 000 1.5h.5zM12 8a.75.75 0 01-.75.75h-.5a.75.75 0 010-1.5h.5A.75.75 0 0112 8zm2.25.75a.75.75 0 000-1.5h-.5a.75.75 0 000 1.5h.5z" />
+              </svg>
+            </summary>
+            <ul class="mt-2">
+              {entries.map(({ title, url, date }) => (
+                <li class="flex items-baseline justify-between gap-4 py-1 text-sm">
+                  <a href={url} class="text-accent min-w-0 truncate hover:underline">
+                    {title}
+                  </a>
+                  <time
+                    datetime={date.toISOString()}
+                    class="text-muted-foreground shrink-0 text-xs"
+                  >
+                    {dayName.format(date)}
+                  </time>
+                </li>
+              ))}
+            </ul>
+          </details>
+        </div>
+      </div>
+    ))
+  }
+</section>

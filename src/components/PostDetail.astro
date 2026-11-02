@@ -38,6 +38,8 @@ const {
   showTags = section === "posts",
 } = Astro.props;
 const locale = Astro.currentLocale ?? config.site.lang;
+// /agents/ is unlisted: keep it out of search engines and the Pagefind index.
+const isUnlisted = section === "agents";
 
 const {
   title,
@@ -81,6 +83,7 @@ const ogImage = ogImageUrl
   canonicalURL={canonicalURL}
   pubDatetime={pubDatetime}
   modDatetime={modDatetime}
+  noindex={isUnlisted}
 >
   <Header />
 
@@ -89,7 +92,7 @@ const ogImage = ogImageUrl
   <main
     id="main-content"
     class:list={["app-layout", { "mt-8": !config.features.showBackButton }]}
-    data-pagefind-body
+    data-pagefind-body={isUnlisted ? undefined : ""}
   >
     <h1
       style={{ viewTransitionName: toTransitionName(post.id) }}

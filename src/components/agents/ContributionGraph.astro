@@ -1,0 +1,109 @@
+---
+/*
+ * GitHub-style calendar of posts per day over the last year, built at
+ * compile time: one column per week, Sunday at the top.
+ */
+import config from "@/config";
+
+type Props = { dates: Date[] };
+
+const { dates } = Astro.props;
+
+const DAY = 86_400_000;
+const dayKey = new Intl.DateTimeFormat("en-CA", {
+  timeZone: config.site.timezone,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+const counts = new Map<string, number>();
+for (const date of dates) {
+  const key = dayKey.format(date);
+  counts.set(key, (counts.get(key) ?? 0) + 1);
+}
+
+// Work on UTC midnights of local calendar days, so day math is exact.
+const today = new Date(`${dayKey.format(new Date())}T00:00:00Z`);
+const start = new Date(today.getTime() - (52 * 7 + today.getUTCDay()) * DAY);
+
+const days: { date: Date; count: number }[] = [];
+for (let time = start.getTime(); time <= today.getTime(); time += DAY) {
+  const date = new Date(time);
+  days.push({ date, count: counts.get(date.toISOString().slice(0, 10)) ?? 0 });
+}
+
+const weeks = Math.ceil(days.length / 7);
+const total = days.reduce((sum, day) => sum + day.count, 0);
+
+const monthName = new Intl.DateTimeFormat("en-US", { timeZone: "UTC", month: "short" });
+const dayLabel = new Intl.DateTimeFormat("en-US", {
+  timeZone: "UTC",
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+});
+
+// Label a week column when its Sunday starts a new month.
+const months: { week: number; name: string }[] = [];
+for (let week = 0; week < weeks; week++) {
+  const first = days[week * 7].date;
+  const previous = week > 0 ? days[(week - 1) * 7].date : null;
+  if (!previous || previous.getUTCMonth() !== first.getUTCMonth()) {
+    months.push({ week, name: monthName.format(first) });
+  }
+}
+// Drop a partial first month whose label would overlap the next one.
+if (months.length > 1 && months[1].week - months[0].week < 3) months.shift();
+
+const levels = ["bg-muted", "bg-accent/45", "bg-accent/65", "bg-accent/85", "bg-accent"];
+const columns = `grid-template-columns: repeat(${weeks}, minmax(0, 1fr))`;
+const postCount = (count: number) => `${count} ${count === 1 ? "post" : "posts"}`;
+---
+
+<section class="mt-8">
+  <h2 class="mb-2 text-base">{postCount(total)} in the last year</h2>
+  <div class="border-border rounded-md border p-4">
+    <div
+      class="text-muted-foreground flex gap-2 text-[10px] leading-none"
+      role="img"
+      aria-label={`${postCount(total)} in the last year`}
+    >
+      <div class="grid grid-rows-7 gap-px pt-5 max-sm:hidden sm:gap-[3px]" aria-hidden="true">
+        <span></span><span>Mon</span><span></span><span>Wed</span><span></span><span>Fri</span><span></span>
+      </div>
+      <div class="min-w-0 flex-1" aria-hidden="true">
+        <div class="grid h-5 grid-rows-1 gap-px sm:gap-[3px]" style={columns}>
+          {
+            months.map(({ week, name }) => (
+              <span
+                class="whitespace-nowrap max-sm:even:invisible"
+                style={`grid-column-start: ${week + 1}`}
+              >
+                {name}
+              </span>
+            ))
+          }
+        </div>
+        <div class="grid grid-flow-col grid-rows-7 gap-px sm:gap-[3px]" style={columns}>
+          {
+            days.map(({ date, count }) => (
+              <span
+                class:list={["aspect-square rounded-[2px]", levels[Math.min(count, 4)]]}
+                title={`${count ? postCount(count) : "No posts"} on ${dayLabel.format(date)}`}
+              />
+            ))
+          }
+        </div>
+      </div>
+    </div>
+    <div
+      class="text-muted-foreground mt-3 flex items-center justify-end gap-1 text-xs"
+      aria-hidden="true"
+    >
+      Less
+      {levels.map(level => <span class:list={["size-[10px] rounded-[2px]", level]} />)}
+      More
+    </div>
+  </div>
+</section>

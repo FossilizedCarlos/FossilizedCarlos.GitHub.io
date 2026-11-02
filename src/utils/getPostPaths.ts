@@ -1,14 +1,15 @@
 import { getRelativeLocaleUrl } from "astro:i18n";
-import { BLOG_PATH, NOTES_PATH } from "@/content.config";
+import { AGENTS_PATH, BLOG_PATH, NOTES_PATH } from "@/content.config";
 import { slugifyStr } from "./slugify";
 import config from "@/config";
 
 /** Collections rendered with the article layout, and their URL prefix. */
-export type ArticleSection = "posts" | "notes";
+export type ArticleSection = "posts" | "notes" | "agents";
 
 const SECTION_PATHS: Record<ArticleSection, string> = {
   posts: BLOG_PATH,
   notes: NOTES_PATH,
+  agents: AGENTS_PATH,
 };
 
 function getPostPathSegments(

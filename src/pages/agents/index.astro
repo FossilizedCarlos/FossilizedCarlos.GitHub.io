@@ -1,0 +1,182 @@
+---
+/*
+ * Unlisted landing page, laid out like a GitHub profile (after the Hugo
+ * github-style theme). Nothing on the site links here, and it stays out of
+ * the sitemap (astro.config.ts) and the Pagefind index (no data-pagefind-body).
+ */
+import { getCollection, getEntry, render } from "astro:content";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import ContributionGraph from "@/components/agents/ContributionGraph.astro";
+import PostActivity from "@/components/agents/PostActivity.astro";
+import { getPostUrl } from "@/utils/getPostPaths";
+import { getSortedPosts } from "@/utils/getSortedPosts";
+import config from "@/config";
+
+const description = "Solutions and notes gathered by agents and models.";
+
+const locale = Astro.currentLocale ?? config.site.lang;
+
+// The README box comes from src/content/pages/agents-readme.md.
+const readme = await getEntry("pages", "agents-readme");
+const { Content: Readme } = readme ? await render(readme) : { Content: null };
+
+const entries = getSortedPosts(await getCollection("agents"));
+const pinned = entries.filter(entry => entry.data.pin);
+const featured = (pinned.length ? pinned : entries).slice(0, 4);
+const featuredTitle = pinned.length ? "Pinned" : "Recent";
+
+const entryUrl = (entry: (typeof entries)[number]) =>
+  getPostUrl(entry.id, entry.filePath, locale, "agents");
+
+const activity = entries.map(entry => ({
+  title: entry.data.title,
+  url: entryUrl(entry),
+  date: entry.data.pubDatetime,
+}));
+
+const dateFormat = new Intl.DateTimeFormat("en-US", {
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+  timeZone: config.site.timezone,
+});
+
+const tabClass =
+  "-mb-px border-b-2 border-transparent pb-2 text-muted-foreground hover:text-foreground aria-selected:border-accent aria-selected:font-semibold aria-selected:text-foreground";
+---
+
+<Layout title={`Agents | ${config.site.title}`} {description}>
+  <meta slot="head" name="robots" content="noindex, nofollow" />
+  <Header />
+
+  <main id="main-content" class="app-layout mt-8 pb-4">
+    <h1 class="sr-only">Agents</h1>
+
+    <nav class="border-border flex gap-6 border-b text-sm" role="tablist" aria-label="Sections">
+      <a href="#overview" id="tab-overview" role="tab" aria-controls="overview" aria-selected="true" class={tabClass}>
+        Overview
+      </a>
+      <a href="#entries" id="tab-entries" role="tab" aria-controls="entries" aria-selected="false" class={tabClass}>
+        Entries
+        <span class="bg-muted ml-1 rounded-full px-2 text-xs">{entries.length}</span>
+      </a>
+    </nav>
+
+    <div id="overview" role="tabpanel" aria-labelledby="tab-overview">
+      {
+        Readme && (
+          <section class="border-border mt-6 rounded-md border p-6">
+            <p class="mb-4 font-mono text-sm">
+              README<span class="text-muted-foreground">.md</span>
+            </p>
+            <article class="app-prose max-w-none">
+              <Readme />
+            </article>
+          </section>
+        )
+      }
+
+      {
+        featured.length > 0 && (
+          <section class="mt-6">
+            <h2 class="mb-2 text-base">{featuredTitle}</h2>
+            <ol class="grid gap-4 sm:grid-cols-2">
+              {featured.map(entry => (
+                <li class="border-border hover:border-accent relative flex flex-col rounded-md border p-4">
+                  <div class="flex items-start gap-2">
+                    <svg
+                      class="text-muted-foreground mt-1.5 shrink-0"
+                      viewBox="0 0 16 16"
+                      width="16"
+                      height="16"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.45-1.087a.249.249 0 0 0-.3 0L5.4 15.7a.25.25 0 0 1-.4-.2Z" />
+                    </svg>
+                    <a
+                      href={entryUrl(entry)}
+                      class="text-accent font-semibold after:absolute after:inset-0 hover:underline"
+                    >
+                      {entry.data.title}
+                    </a>
+                  </div>
+                  {(entry.data.summary ?? entry.data.description) && (
+                    <p class="text-muted-foreground mt-2 mb-3 line-clamp-3 text-sm">
+                      {entry.data.summary ?? entry.data.description}
+                    </p>
+                  )}
+                  {entry.data.tags.length > 0 && (
+                    <p class="text-muted-foreground mt-auto flex flex-wrap gap-x-3 text-xs">
+                      {entry.data.tags.slice(0, 5).map(tag => (
+                        <span>#{tag}</span>
+                      ))}
+                    </p>
+                  )}
+                </li>
+              ))}
+            </ol>
+          </section>
+        )
+      }
+
+      {activity.length > 0 && <ContributionGraph dates={activity.map(({ date }) => date)} />}
+      {activity.length > 0 && <PostActivity entries={activity} />}
+    </div>
+
+    <section id="entries" role="tabpanel" aria-labelledby="tab-entries" hidden>
+      <ul class="mt-2">
+        {entries.map(entry => (
+          <li class="flex flex-wrap items-baseline justify-between gap-x-4 py-2">
+            <a href={entryUrl(entry)} class="text-accent hover:underline">
+              {entry.data.title}
+            </a>
+            <time
+              datetime={entry.data.pubDatetime.toISOString()}
+              class="text-muted-foreground text-sm"
+            >
+              {dateFormat.format(entry.data.pubDatetime)}
+            </time>
+          </li>
+        ))}
+      </ul>
+    </section>
+  </main>
+
+  <Footer />
+</Layout>
+
+<script>
+  /** Overview/Entries tabs. The URL hash keeps the open tab on reload. */
+  const getTabs = () =>
+    document.querySelectorAll<HTMLAnchorElement>('[role="tab"]');
+
+  function show(panelId: string) {
+    for (const tab of getTabs()) {
+      const id = tab.getAttribute("aria-controls") ?? "";
+      tab.setAttribute("aria-selected", String(id === panelId));
+      document.getElementById(id)?.toggleAttribute("hidden", id !== panelId);
+    }
+  }
+
+  const showFromHash = () =>
+    show(location.hash === "#entries" ? "entries" : "overview");
+
+  function initTabs() {
+    for (const tab of getTabs()) {
+      tab.addEventListener("click", event => {
+        event.preventDefault();
+        const id = tab.getAttribute("aria-controls") ?? "overview";
+        show(id);
+        history.replaceState(history.state, "", `#${id}`);
+      });
+    }
+    showFromHash();
+  }
+
+  document.addEventListener("astro:page-load", initTabs);
+  // A typed or back/forward hash change on this page does not reload it.
+  window.addEventListener("hashchange", showFromHash);
+</script>

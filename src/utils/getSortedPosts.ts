@@ -1,4 +1,5 @@
 import type { CollectionEntry } from "astro:content";
+import type { ArticleSection } from "./getPostPaths";
 import { postFilter } from "./postFilter";
 
 /**
@@ -7,7 +8,9 @@ import { postFilter } from "./postFilter";
  *
  * Note: filtering respects drafts and scheduled posts via `postFilter()`.
  */
-export function getSortedPosts(posts: CollectionEntry<"posts" | "notes">[]) {
+export function getSortedPosts<T extends CollectionEntry<ArticleSection>>(
+  posts: T[]
+): T[] {
   return posts
     .filter(postFilter)
     .sort(

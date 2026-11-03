@@ -3,6 +3,18 @@
 @import "./typography.css";
 @import "rehype-callouts/theme/obsidian";
 
+/* The custom `ollama` callout borrows the Cite colors. */
+[data-callout="ollama"] {
+  --rc-color-light: var(--callout-cite-color-light, rgb(158, 158, 158));
+  --rc-color-dark: var(--callout-cite-color-dark, rgb(158, 158, 158));
+
+  /* Body-colored icon and text, about a space and a half apart. */
+  .callout-title {
+    @apply text-foreground;
+    gap: 1.5ch;
+  }
+}
+
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
 @layer base {

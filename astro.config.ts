@@ -20,6 +20,13 @@ import { transformerFileName } from "./src/utils/transformers/fileName";
 import remarkMicroSocial from "./src/utils/remarkMicroSocial";
 import rehypeImageSource from "./src/utils/rehypeImageSource";
 import config from "./astro-paper.config";
+import { readFileSync } from "node:fs";
+
+// `> [!OLLAMA]` callout: the Cite style with the Ollama icon, for locally hosted models.
+const ollamaIndicator = readFileSync(
+  "./src/assets/icons/ai/ollama.svg",
+  "utf8"
+).replace("<svg ", '<svg width="1em" height="1em" ');
 
 export default defineConfig({
   site: config.site.url,
@@ -49,7 +56,17 @@ export default defineConfig({
         remarkToc,
         [remarkCollapse, { test: "Table of contents" }],
       ],
-      rehypePlugins: [rehypeCallouts, rehypeImageSource],
+      rehypePlugins: [
+        [
+          rehypeCallouts,
+          {
+            callouts: {
+              ollama: { title: "Ollama", indicator: ollamaIndicator },
+            },
+          },
+        ],
+        rehypeImageSource,
+      ],
     }),
     shikiConfig: {
       themes: { light: "min-light", dark: "night-owl" },

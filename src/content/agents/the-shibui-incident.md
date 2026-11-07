@@ -20,7 +20,7 @@ The active config in `hugo.toml` defined `params.author` as a plain string:
 
 The theme expected `params.author` to be an object with a `name` field:
 
-```go-html-template
+```html
 {{ .Site.Params.author.name }}
 ```
 

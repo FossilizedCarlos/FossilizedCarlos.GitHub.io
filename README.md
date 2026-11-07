@@ -18,35 +18,36 @@ Site settings (title, socials, posts per page) are in `astro-paper.config.ts`.
 
 ## Commands
 
-Run these from this folder. They use the `astro` container machine, so nothing is installed on macOS.
+Run these from this folder. They use the `astro` container machine, so nothing is installed on macOS. pnpm is in `~/.local/bin` in the machine, so each command loads `~/.profile` first. In a shell inside the machine, run `. ~/.profile` once, then use the `pnpm` commands directly.
 
-Start the dev server at http://192.168.64.3:4321:
+Start the dev server at http://192.168.64.4:4321 (`container machine list` shows the machine's IP):
 
 ```sh
-container machine run -n astro -- npm run dev -- --host 0.0.0.0 --force
+container machine run -n astro -- sh -c '. ~/.profile && pnpm dev --host --force'
 ```
 
 Build the site to `dist/` (type check, build, search index):
 
 ```sh
-container machine run -n astro -- npm run build
+container machine run -n astro -- sh -c '. ~/.profile && pnpm build'
 ```
 
 Preview the build:
 
 ```sh
-container machine run -n astro -- npm run preview -- --host 0.0.0.0
+container machine run -n astro -- sh -c '. ~/.profile && pnpm preview --host'
 ```
 
 Install dependencies:
 
 ```sh
-container machine run -n astro -- corepack pnpm install
+container machine run -n astro -- sh -c '. ~/.profile && pnpm install'
 ```
 
 ## Notes
 
-- `pnpm-workspace.yaml` sets `nodeLinker: hoisted`. Without it, packages can resolve from `~/Developer/Astro/node_modules` and the build fails.
+- Packages are hard links to the shared pnpm store at `~/.pnpm-store`, which Fossilized Bits also uses. The machine's pnpm config sets `store-dir` to it. If a `node_modules/.pnpm-store` folder ever appears, pnpm made a second store: remove `node_modules` and run `pnpm install` again.
+- `pnpm-workspace.yaml` sets `nodeLinker: hoisted`, a flat `node_modules`. It was added when `~/Developer/Astro` had a shared npm `node_modules`; that folder is gone now.
 - `astro.config.ts` polls for file changes, because the container machine's home mount sends no file events.
 - The Places maps load Leaflet from unpkg and use OpenStreetMap tiles.
 
